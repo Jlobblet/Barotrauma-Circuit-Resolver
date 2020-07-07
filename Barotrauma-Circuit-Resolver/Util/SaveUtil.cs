@@ -9,7 +9,7 @@ using System.Xml.Linq;
 
 namespace Barotrauma_Circuit_Resolver
 {
-    class SaveUtil
+    public static class SaveUtil
     {
         public static XDocument LoadSubmarine(string filepath)
         {
