@@ -11,18 +11,18 @@ namespace Barotrauma_Circuit_Resolver.Util
     {
         private int id;
         private string name;
-        private IEnumerable<Edge> edges;
+        private HashSet<Edge<Vertex>> edges;
         public Vertex(int id, string name)
         {
             Id = id;
             Name = name;
-            Edges = Enumerable.Empty<Edge>();
+            Edges = new HashSet<Edge<Vertex>>();
         }
 
         public int Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }
         public int Order { get => Edges.Count(); }
-        internal IEnumerable<Edge> Edges { get => edges; set => edges = value; }
+        internal HashSet<Edge<Vertex>> Edges { get => edges; set => edges = value; }
 
         public override bool Equals(object obj)
         {
@@ -42,14 +42,14 @@ namespace Barotrauma_Circuit_Resolver.Util
 
     }
 
-    public class Edge : IEdge<Vertex>
+    public class Edge<TVertex> : IEdge<TVertex>
     {
         private int id;
         private string name;
-        private readonly Vertex source;
-        private readonly Vertex target;
+        private readonly TVertex source;
+        private readonly TVertex target;
 
-        public Edge(int id, string name, Vertex source, Vertex target)
+        public Edge(int id, string name, TVertex source, TVertex target)
         {
             Id = id;
             Name = name;
@@ -57,9 +57,9 @@ namespace Barotrauma_Circuit_Resolver.Util
             this.target = target;
         }
 
-        public Vertex Source => source;
+        public TVertex Source => source;
 
-        public Vertex Target => target;
+        public TVertex Target => target;
 
         public string Name { get => name; set => name = value; }
         public int Id { get => id; set => id = value; }
@@ -71,7 +71,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public override bool Equals(object obj)
         {
-            return obj is Edge edge &&
+            return obj is Edge<TVertex> edge &&
                    Id == edge.Id;
         }
 
