@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Xml.Linq;
 
 namespace Barotrauma_Circuit_Resolver

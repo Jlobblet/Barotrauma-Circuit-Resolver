@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections;
+﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Xml.Linq;
-using QuickGraph;
-using System.Xml.XPath;
-using System.Security.Cryptography;
-using System.Windows.Forms;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class GraphUtil
     {
-        static readonly string[] PowerConnections = { "power", "power_in", "power_out" };
-        private static bool FilterPower(XElement elt) => !PowerConnections.Contains(elt.Attribute("name").Value);
+        private static readonly string[] PowerConnections = { "power", "power_in", "power_out" };
+        private static bool FilterPower(XElement elt)
+        {
+            return !PowerConnections.Contains(elt.Attribute("name").Value);
+        }
 
         public static IEnumerable<Vertex> GetEntryPoints(this XDocument submarine)
         {
@@ -44,10 +42,10 @@ namespace Barotrauma_Circuit_Resolver.Util
                     .Intersect(e.Descendants("input").Elements("link")
                         .Select(i => i.Attribute("w").Value))
                     .Any())
-                .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value)); 
+                .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
         }
 
-        public static void AddDownstreamComponents (this AdjacencyGraph<Vertex, Edge<Vertex>> graph, XDocument submarine, Vertex vertex)
+        public static void AddDownstreamComponents(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, XDocument submarine, Vertex vertex)
         {
             graph.AddVertex(vertex);
             IEnumerable<Vertex> next = submarine.GetNextComponentIDs(vertex);
@@ -67,7 +65,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
         {
             IEnumerable<Vertex> entryPoints = submarine.GetEntryPoints();
-            var graph = new AdjacencyGraph<Vertex, Edge<Vertex>> ();
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>();
             foreach (Vertex entryPoint in entryPoints)
             {
                 graph.AddDownstreamComponents(submarine, entryPoint);

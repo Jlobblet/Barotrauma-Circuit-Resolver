@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Windows.Forms.Design;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -23,7 +21,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public int Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }
-        public int Order { get => Edges.Count(); }
+        public int Order => Edges.Count();
         internal HashSet<Edge<Vertex>> Edges { get => edges; set => edges = value; }
         public Guid Guid => guid;
 
