@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30223.230
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Barotrauma-Circuit-Resolver", "Barotrauma-Circuit-Resolver\Barotrauma-Circuit-Resolver.csproj", "{B01E7B3B-B783-4E84-B411-9122FDB72B50}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B01E7B3B-B783-4E84-B411-9122FDB72B50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B01E7B3B-B783-4E84-B411-9122FDB72B50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B01E7B3B-B783-4E84-B411-9122FDB72B50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B01E7B3B-B783-4E84-B411-9122FDB72B50}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2F3FDF02-4390-4921-A188-A1F002C918D8}
+	EndGlobalSection
+EndGlobal
