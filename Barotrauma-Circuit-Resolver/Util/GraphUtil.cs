@@ -16,9 +16,16 @@ namespace Barotrauma_Circuit_Resolver.Util
             return submarine.Elements()
                             .Where(e => e.XPathSelectElements("//input/link")
                                          .Select(i => element.XPathSelectElements("//output/link")
-                                                              .Select(o => (o.Attribute("w")?.Value))
-                                                              .Contains(i.Attribute("w")?.Value))
+                                                             .Select(o => (o.Attribute("w")?.Value))
+                                                             .Contains(i.Attribute("w")?.Value))
                                          .Any())
+                            .Select(e => e.Attribute("ID").Value);
+        }
+
+        public static IEnumerable<string> GetEntryPoints(this XDocument submarine)
+        {
+            return submarine.Elements()
+                            .Where(e => !e.XPathSelectElements("//input/link").Any())
                             .Select(e => e.Attribute("ID").Value);
         }
     }
