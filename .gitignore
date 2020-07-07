@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Submarine files
+*.sub
+
 # User-specific files
 *.rsuser
 *.suo
