@@ -70,7 +70,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
         {
             IEnumerable<Vertex> entryPoints = submarine.GetEntryPoints();
-            AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>();
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
             graph.EdgeAdded += Graph_EdgeAdded;
             foreach (Vertex entryPoint in entryPoints)
             {
