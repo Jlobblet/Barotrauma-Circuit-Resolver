@@ -2,20 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class GraphUtil
     {
-        public enum Mark
-        {
-            Unmarked,
-            Temporary,
-            Permanent
-        }
-
         private static readonly string[] PowerConnections = { "power", "power_in", "power_out" };
+
         private static bool FilterPower(XElement elt)
         {
             return !PowerConnections.Contains(elt.Attribute("name").Value);
@@ -32,7 +27,6 @@ namespace Barotrauma_Circuit_Resolver.Util
                                         .Elements("link").Any())
                                  .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
         }
-
 
         public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, Vertex vertex)
         {
@@ -81,103 +75,24 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         private static void Graph_EdgeAdded(Edge<Vertex> e)
         {
-            var source = e.Source;
-            var target = e.Target;
-            source.OutgoingEdges.Add(e);
-            target.IncomingEdges.Add(e);
+            e.Source.OutgoingEdges.Add(e);
+            e.Target.IncomingEdges.Add(e);
         }
 
-        public static IEnumerable<Vertex> getNextVertices(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Vertex vertex)
+        public static void SortVertexIDs(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            // Get outgoing edges
-            if(componentGraph.TryGetOutEdges(vertex, out IEnumerable<Edge<Vertex>> nextEdges)){
-                // Return nodes connected to these edges
-                return nextEdges.Select(e => e.Target);
-            }
+            var Guids = graph.Vertices.Select(v => v.Guid);
+            var Ids = graph.Vertices.Select(v => v.Id);
+            var SortedIds = Ids.OrderBy(i => i);
 
-            return Enumerable.Empty<Vertex>();
-        }
+            var EdgesBefore = graph.Edges;
 
-        public static bool VisitDownstream(Vertex vertex, Guid[] sorted, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<Guid, Mark> marks)
-        {
-            // Assign the new IDs to the vertices
-            if (marks.ContainsKey(vertex.Guid))
+            foreach ((Vertex v, int newId) in graph.Vertices.Zip(SortedIds))
             {
-                if (marks[vertex.Guid] == Mark.Permanent)
-                {
-                    // End of branch
-                    return true;
-                }
-                if (marks[vertex.Guid] == Mark.Temporary)
-                {
-                    // Graph is not Acyclic
-                    return false;
-                }
-
-                //Assign temporary mark
-                marks[vertex.Guid] = Mark.Temporary;
-            }
-            else
-            {
-                //Assign temporary mark
-                marks.Add(vertex.Guid, Mark.Temporary);
+                v.Id = newId;
             }
 
-            // Visit next components
-            foreach (Vertex nextVertex in componentGraph.getNextVertices(vertex))
-            {
-                if (!VisitDownstream(nextVertex, sorted, ref head, componentGraph, marks))
-                {
-                    // Graph is not acyclic
-                    return false;
-                }
-            }
-
-            // Assign permanent mark
-            marks[vertex.Guid] = Mark.Permanent;
-
-            // Prepend n to sorted
-            sorted[head--] = vertex.Guid;
-
-            return true;
-        }
-
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
-        {
-            // Create GUID list for sorted vertices
-            Guid[] sorted = new Guid[componentGraph.VertexCount];
-            int head = componentGraph.VertexCount-1;
-
-            // Create Dictionary to allow marking of vertices
-            Dictionary<Guid, Mark> marks = new Dictionary<Guid, Mark>();
-
-            // Visit first unmarked Vertex
-            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
-            while (first != null) // Assumes all graph vertices are non-default. 
-            {
-                if(!VisitDownstream(first, sorted, ref head, componentGraph, marks))
-                {
-                    return componentGraph;
-                }
-                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
-            }
-
-            // Assign the new IDs to the vertices
-            Dictionary<Guid, Pair<int, int>> newIds = new Dictionary<Guid, Pair<int, int>>();
-
-            foreach (Vertex vertex in componentGraph.Vertices)
-            {
-                newIds.Add(vertex.Guid, new Pair<int, int>(vertex.Id, 0));
-            }
-
-            int i = 0;
-            foreach (Vertex vertex in componentGraph.Vertices)
-            {
-                newIds[vertex.Guid].After = newIds[sorted[i]].Before;
-                vertex.Id = newIds[vertex.Guid].After;
-            }
-
-            return componentGraph;
+            var EdgesAfter = graph.Edges;
         }
     }
 }
