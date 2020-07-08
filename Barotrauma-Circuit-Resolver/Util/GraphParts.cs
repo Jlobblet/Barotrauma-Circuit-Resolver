@@ -31,6 +31,16 @@ namespace Barotrauma_Circuit_Resolver.Util
                    Id == vertex.Id;
         }
 
+        public static bool operator ==(Vertex lhs, Vertex rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Vertex lhs, Vertex rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(Id);
@@ -74,6 +84,16 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             return obj is Edge<TVertex> edge &&
                    Id == edge.Id;
+        }
+
+        public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Edge<TVertex> lhs, Edge<TVertex> rhs)
+        {
+            return !lhs.Equals(rhs);
         }
 
         public override int GetHashCode()
