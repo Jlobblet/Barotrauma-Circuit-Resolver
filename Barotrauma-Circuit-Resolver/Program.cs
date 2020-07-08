@@ -17,12 +17,15 @@ namespace Barotrauma_Circuit_Resolver
         private static void Main()
         {
 #if DEBUG
-            const string inputSub = "Azimuth.sub";
+            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/graph_tests_acyclic.sub";
             const string outputFile = "output.graphml";
 
             XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
 
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph = GraphUtil.CreateComponentGraph(submarine);
+
+            graph = GraphUtil.SolveUpdateOrder(graph);
+
             VertexIdentity<Vertex> vertexIdentity = new VertexIdentity<Vertex>(v => v.ToString());
             EdgeIdentity<Vertex, Util.Edge<Vertex>> edgeIdentiter = new EdgeIdentity<Vertex, Util.Edge<Vertex>>(e => e.ToString());
 
