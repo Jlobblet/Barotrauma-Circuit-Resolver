@@ -9,20 +9,24 @@ namespace Barotrauma_Circuit_Resolver.Util
     {
         private int id;
         private string name;
-        private HashSet<Edge<Vertex>> edges;
+        private HashSet<Edge<Vertex>> outgoingEdges;
+        private HashSet<Edge<Vertex>> incomingEdges;
         private Guid guid;
         public Vertex(int id, string name)
         {
             Id = id;
             Name = name;
-            Edges = new HashSet<Edge<Vertex>>();
+            OutgoingEdges = new HashSet<Edge<Vertex>>();
+            IncomingEdges = new HashSet<Edge<Vertex>>();
             guid = Guid.NewGuid();
         }
 
         public int Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }
         public int Order => Edges.Count();
-        internal HashSet<Edge<Vertex>> Edges { get => edges; set => edges = value; }
+        internal HashSet<Edge<Vertex>> OutgoingEdges { get => outgoingEdges; set => outgoingEdges = value; }
+        internal HashSet<Edge<Vertex>> IncomingEdges { get => incomingEdges; set => incomingEdges = value; }
+        internal HashSet<Edge<Vertex>> Edges => (HashSet<Edge<Vertex>>)OutgoingEdges.Union(IncomingEdges);
         public Guid Guid => guid;
 
         public override bool Equals(object obj)

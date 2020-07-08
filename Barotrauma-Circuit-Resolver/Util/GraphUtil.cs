@@ -83,8 +83,8 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             var source = e.Source;
             var target = e.Target;
-            source.Edges.Add(e);
-            target.Edges.Add(e);
+            source.OutgoingEdges.Add(e);
+            target.IncomingEdges.Add(e);
         }
 
         public static IEnumerable<Vertex> getNextVertices(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Vertex vertex)
