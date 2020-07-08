@@ -32,7 +32,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public int Order => Edges.Count();
         internal HashSet<Edge<Vertex>> OutgoingEdges { get => outgoingEdges; set => outgoingEdges = value; }
         internal HashSet<Edge<Vertex>> IncomingEdges { get => incomingEdges; set => incomingEdges = value; }
-        internal HashSet<Edge<Vertex>> Edges => (HashSet<Edge<Vertex>>)OutgoingEdges.Union(IncomingEdges);
+        internal HashSet<Edge<Vertex>> Edges => OutgoingEdges.Union(IncomingEdges).ToHashSet<Edge<Vertex>>();
         public Guid Guid => guid;
 
         public override bool Equals(object obj)
