@@ -66,14 +66,12 @@ namespace Barotrauma_Circuit_Resolver.Util
     public class Edge<TVertex> : IEdge<TVertex>
     {
         private int id;
-        private string name;
         private readonly TVertex source;
         private readonly TVertex target;
 
-        public Edge(int id, string name, TVertex source, TVertex target)
+        public Edge(int id, TVertex source, TVertex target)
         {
             Id = id;
-            Name = name;
             this.source = source;
             this.target = target;
         }
@@ -82,12 +80,12 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public TVertex Target => target;
 
-        public string Name { get => name; set => name = value; }
+        public string Name => ToString();
         public int Id { get => id; set => id = value; }
 
         public override string ToString()
         {
-            return string.Format("{0}_{1}", Name, Id);
+            return string.Format("{0}-{1}_{2}", Source.ToString(), Target.ToString(), Id);
         }
 
         public override bool Equals(object obj)

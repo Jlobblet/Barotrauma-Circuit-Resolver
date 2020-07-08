@@ -60,7 +60,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             {
                 if (!graph.TryGetEdge(vertex, downstreamComponent, out Edge<Vertex> _))
                 {
-                    Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, string.Format("{0}-{1}", vertex.Id, downstreamComponent.Id), vertex, downstreamComponent);
+                    Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, vertex, downstreamComponent);
                     graph.AddEdge(edge);
                     graph.AddDownstreamComponents(submarine, downstreamComponent);
                 }
