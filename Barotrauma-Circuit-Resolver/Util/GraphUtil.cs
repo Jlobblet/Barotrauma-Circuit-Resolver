@@ -8,6 +8,13 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class GraphUtil
     {
+        public enum Mark
+        {
+            Unmarked,
+            Temporary,
+            Permanent
+        }
+
         private static readonly string[] PowerConnections = { "power", "power_in", "power_out" };
         private static bool FilterPower(XElement elt)
         {
@@ -71,6 +78,99 @@ namespace Barotrauma_Circuit_Resolver.Util
                 graph.AddDownstreamComponents(submarine, entryPoint);
             }
             return graph;
+        }
+
+        public static IEnumerable<Vertex> getNextVertices(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Vertex vertex)
+        {
+            // Get outgoing edges
+            if(componentGraph.TryGetOutEdges(vertex, out IEnumerable<Edge<Vertex>> nextEdges)){
+                // Return nodes connected to these edges
+                return nextEdges.Select(e => e.Target);
+            }
+
+            return Enumerable.Empty<Vertex>();
+        }
+
+        public static bool VisitDownstream(Vertex vertex, Guid[] sorted, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<Guid, Mark> marks)
+        {
+            // Assign the new IDs to the vertices
+            if (marks.ContainsKey(vertex.Guid))
+            {
+                if (marks[vertex.Guid] == Mark.Permanent)
+                {
+                    // End of branch
+                    return true;
+                }
+                if (marks[vertex.Guid] == Mark.Temporary)
+                {
+                    // Graph is not Acyclic
+                    return false;
+                }
+
+                //Assign temporary mark
+                marks[vertex.Guid] = Mark.Temporary;
+            }
+            else
+            {
+                //Assign temporary mark
+                marks.Add(vertex.Guid, Mark.Temporary);
+            }
+
+            // Visit next components
+            foreach (Vertex nextVertex in componentGraph.getNextVertices(vertex))
+            {
+                if (!VisitDownstream(nextVertex, sorted, ref head, componentGraph, marks))
+                {
+                    // Graph is not acyclic
+                    return false;
+                }
+            }
+
+            // Assign permanent mark
+            marks[vertex.Guid] = Mark.Permanent;
+
+            // Prepend n to sorted
+            sorted[head--] = vertex.Guid;
+
+            return true;
+        }
+
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
+        {
+            // Create GUID list for sorted vertices
+            Guid[] sorted = new Guid[componentGraph.VertexCount];
+            int head = componentGraph.VertexCount-1;
+
+            // Create Dictionary to allow marking of vertices
+            Dictionary<Guid, Mark> marks = new Dictionary<Guid, Mark>();
+
+            // Visit first unmarked Vertex
+            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
+            while (first != null) // Assumes all graph vertices are non-default. 
+            {
+                if(!VisitDownstream(first, sorted, ref head, componentGraph, marks))
+                {
+                    return componentGraph;
+                }
+                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
+            }
+
+            // Assign the new IDs to the vertices
+            Dictionary<Guid, Pair<int, int>> newIds = new Dictionary<Guid, Pair<int, int>>();
+
+            foreach (Vertex vertex in componentGraph.Vertices)
+            {
+                newIds.Add(vertex.Guid, new Pair<int, int>(vertex.Id, 0));
+            }
+
+            int i = 0;
+            foreach (Vertex vertex in componentGraph.Vertices)
+            {
+                newIds[vertex.Guid].After = newIds[sorted[i]].Before;
+                vertex.Id = newIds[vertex.Guid].After;
+            }
+
+            return componentGraph;
         }
     }
 }
