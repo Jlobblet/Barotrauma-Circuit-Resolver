@@ -34,14 +34,14 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
 
 
-        public static IEnumerable<Vertex> GetNextComponentIDs(this XDocument submarine, Vertex vertex)
+        public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, Vertex vertex)
         {
-            return submarine.GetNextComponentIDs(submarine.Root.Elements()
+            return submarine.GetNextVertices(submarine.Root.Elements()
                 .Where(e => e.Attribute("ID").Value == vertex.Id.ToString())
                 .First());
         }
 
-        public static IEnumerable<Vertex> GetNextComponentIDs(this XDocument submarine, XElement element)
+        public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, XElement element)
         {
             return submarine.Root.Elements()
                 .Where(e => element.Descendants("output").Where(FilterPower).Elements("link")
@@ -55,7 +55,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public static void AddDownstreamComponents(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, XDocument submarine, Vertex vertex)
         {
             graph.AddVertex(vertex);
-            IEnumerable<Vertex> next = submarine.GetNextComponentIDs(vertex);
+            IEnumerable<Vertex> next = submarine.GetNextVertices(vertex);
             foreach (Vertex downstreamComponent in next)
             {
                 if (!graph.TryGetEdge(vertex, downstreamComponent, out Edge<Vertex> _))
