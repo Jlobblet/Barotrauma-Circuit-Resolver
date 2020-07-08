@@ -62,8 +62,6 @@ namespace Barotrauma_Circuit_Resolver.Util
                 {
                     Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, string.Format("{0}-{1}", vertex.Id, downstreamComponent.Id), vertex, downstreamComponent);
                     graph.AddEdge(edge);
-                    vertex.Edges.Add(edge);
-                    downstreamComponent.Edges.Add(edge);
                     graph.AddDownstreamComponents(submarine, downstreamComponent);
                 }
             }
@@ -73,11 +71,20 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             IEnumerable<Vertex> entryPoints = submarine.GetEntryPoints();
             AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>();
+            graph.EdgeAdded += Graph_EdgeAdded;
             foreach (Vertex entryPoint in entryPoints)
             {
                 graph.AddDownstreamComponents(submarine, entryPoint);
             }
             return graph;
+        }
+
+        private static void Graph_EdgeAdded(Edge<Vertex> e)
+        {
+            var source = e.Source;
+            var target = e.Target;
+            source.Edges.Add(e);
+            target.Edges.Add(e);
         }
 
         public static IEnumerable<Vertex> getNextVertices(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Vertex vertex)
