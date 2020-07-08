@@ -12,6 +12,12 @@ namespace Barotrauma_Circuit_Resolver.Util
         private HashSet<Edge<Vertex>> outgoingEdges;
         private HashSet<Edge<Vertex>> incomingEdges;
         private Guid guid;
+
+        public Vertex(int id)
+        {
+            new Vertex(id, id.ToString());
+        }
+
         public Vertex(int id, string name)
         {
             Id = id;
