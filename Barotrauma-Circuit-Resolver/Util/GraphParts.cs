@@ -62,13 +62,11 @@ namespace Barotrauma_Circuit_Resolver.Util
 
     public class Edge<TVertex> : IEdge<TVertex>
     {
-        private int id;
         private readonly TVertex source;
         private readonly TVertex target;
 
-        public Edge(int id, TVertex source, TVertex target)
+        public Edge(TVertex source, TVertex target)
         {
-            Id = id;
             this.source = source;
             this.target = target;
         }
@@ -78,17 +76,23 @@ namespace Barotrauma_Circuit_Resolver.Util
         public TVertex Target => target;
 
         public string Name => ToString();
-        public int Id { get => id; set => id = value; }
 
         public override string ToString()
         {
-            return string.Format("{0}-{1}_{2}", Source.ToString(), Target.ToString(), Id);
+            return string.Format("{0}-{1}", Source.ToString(), Target.ToString());
         }
 
         public override bool Equals(object obj)
         {
             return obj is Edge<TVertex> edge &&
-                   Id == edge.Id;
+                   EqualityComparer<TVertex>.Default.Equals(source, edge.source) &&
+                   EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
+                   EqualityComparer<TVertex>.Default.Equals(Target, edge.Target);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Source, Target);
         }
 
         public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs)
@@ -101,9 +105,5 @@ namespace Barotrauma_Circuit_Resolver.Util
             return !lhs.Equals(rhs);
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Id);
-        }
     }
 }
