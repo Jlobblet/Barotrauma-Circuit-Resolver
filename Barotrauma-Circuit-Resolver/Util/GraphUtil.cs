@@ -177,11 +177,11 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             // Create sorted list of IDs
             var idPool = componentGraph.Vertices.Select(v => v.Id);
-            var sortedGuidsIds = idPool.OrderBy(i => i);
+            var sortedIds = idPool.OrderBy(i => i);
 
             // Apply list to graph
             int i = 0;
-            foreach (var id in sortedGuidsIds)
+            foreach (var id in sortedIds)
             {
                 Vertices[sortedGuids[i++]].Id = id;
             }
