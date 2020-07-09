@@ -16,16 +16,20 @@ namespace Barotrauma_Circuit_Resolver.Util
             return !PowerConnections.Contains(elt.Attribute("name").Value);
         }
 
-        public static IEnumerable<Vertex> GetEntryPoints(this XDocument submarine)
+        public static IEnumerable<Vertex> GetComponents(this XDocument submarine)
         {
             return submarine.Root.Elements()
-                                 .Where(e =>
-                                    !(e.Descendants("input").Where(FilterPower)
-                                            .Elements("link").Any()
-                                        && e.Descendants("input").Any())
-                                    && e.Descendants("output").Where(FilterPower)
-                                        .Elements("link").Any())
+                                 .Where(e => e.Descendants("input")
+                                    .Union(e.Descendants("output"))
+                                    .Where(FilterPower)
+                                    .Elements("link").Any())
                                  .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
+        }
+
+        public static IEnumerable<Edge<Vertex>> GetEdges(this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        {
+            return graph.Vertices.Select(s => submarine.GetNextVertices(s).Select(t => new Edge<Vertex>(s, t)))
+                                 .SelectMany(e => e).Distinct();
         }
 
         public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, Vertex vertex)
@@ -46,30 +50,12 @@ namespace Barotrauma_Circuit_Resolver.Util
                 .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
         }
 
-        public static void AddDownstreamComponents(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, XDocument submarine, Vertex vertex)
-        {
-            graph.AddVertex(vertex);
-            IEnumerable<Vertex> next = submarine.GetNextVertices(vertex);
-            foreach (Vertex downstreamComponent in next)
-            {
-                if (!graph.TryGetEdge(vertex, downstreamComponent, out Edge<Vertex> _))
-                {
-                    Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, vertex, downstreamComponent);
-                    graph.AddEdge(edge);
-                    graph.AddDownstreamComponents(submarine, downstreamComponent);
-                }
-            }
-        }
-
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
         {
-            IEnumerable<Vertex> entryPoints = submarine.GetEntryPoints();
             AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
             graph.EdgeAdded += Graph_EdgeAdded;
-            foreach (Vertex entryPoint in entryPoints)
-            {
-                graph.AddDownstreamComponents(submarine, entryPoint);
-            }
+            graph.AddVertexRange(submarine.GetComponents());
+            graph.AddEdgeRange(submarine.GetEdges(graph));
             return graph;
         }
 
