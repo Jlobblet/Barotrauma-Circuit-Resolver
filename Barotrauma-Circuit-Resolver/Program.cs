@@ -24,7 +24,7 @@ namespace Barotrauma_Circuit_Resolver
 
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph = GraphUtil.CreateComponentGraph(submarine);
 
-            graph.SortVertexIDs();
+            graph.SolveUpdateOrder();
 
             VertexIdentity<Vertex> vertexIdentity = new VertexIdentity<Vertex>(v => v.ToString());
             EdgeIdentity<Vertex, Util.Edge<Vertex>> edgeIdentiter = new EdgeIdentity<Vertex, Util.Edge<Vertex>>(e => e.ToString());

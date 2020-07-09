@@ -34,7 +34,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static IEnumerable<Edge<Vertex>> GetEdges(this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            return graph.Vertices.Select(s => submarine.GetNextVertices(s).Select(t => new Edge<Vertex>(s, t)))
+            return graph.Vertices.Select(s => submarine.GetNextVertices(s).Select(t => new Edge<Vertex>(s, graph.Vertices.First(v => v.Id == t.Id))))
                                  .SelectMany(e => e).Distinct();
         }
 
@@ -56,34 +56,6 @@ namespace Barotrauma_Circuit_Resolver.Util
                 .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
         }
 
-        public static void AddDownstreamComponents(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, XDocument submarine, Vertex vertex, Dictionary<int, Vertex> idTable)
-        {
-
-            graph.AddVertex(vertex);
-            IEnumerable<Vertex> next = submarine.GetNextComponentIDs(vertex);
-            foreach (Vertex downstreamComponent in next)
-            {
-                if (!graph.TryGetEdge(vertex, downstreamComponent, out Edge<Vertex> _))
-                {
-                    // Prevent formation of duplicate nodes
-                    if (idTable.ContainsKey(downstreamComponent.Id))
-                    {
-                        Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, string.Format("{0}-{1}", vertex.Id, downstreamComponent.Id), vertex, idTable[downstreamComponent.Id]);
-                        graph.AddEdge(edge);
-                        continue;
-                    }
-                    else
-                    {
-                        idTable.Add(downstreamComponent.Id, downstreamComponent);
-                        Edge<Vertex> edge = new Edge<Vertex>(graph.EdgeCount, string.Format("{0}-{1}", vertex.Id, downstreamComponent.Id), vertex, downstreamComponent);
-                        graph.AddEdge(edge);
-                        graph.AddDownstreamComponents(submarine, downstreamComponent, idTable);
-
-                    }
-                }
-            }
-        }
-
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
         {
             AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
@@ -99,35 +71,37 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
-        public static bool VisitDownstream(Vertex vertex, Guid[] sortedGuids, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<Guid, Mark> marks)
+        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
         {
+            System.Diagnostics.Debug.WriteLine("Evaluating \t" + vertex);
+
             // Assign the new IDs to the vertices
-            if (marks.ContainsKey(vertex.Guid))
+            if (marks.ContainsKey(vertex.Id))
             {
-                if (marks[vertex.Guid] == Mark.Permanent)
+                if (marks[vertex.Id] == Mark.Permanent)
                 {
                     // End of branch
                     return true;
                 }
-                if (marks[vertex.Guid] == Mark.Temporary)
+                if (marks[vertex.Id] == Mark.Temporary)
                 {
                     // Graph is not Acyclic
                     return false;
                 }
 
                 //Assign temporary mark
-                marks[vertex.Guid] = Mark.Temporary;
+                marks[vertex.Id] = Mark.Temporary;
             }
             else
             {
                 //Assign temporary mark
-                marks.Add(vertex.Guid, Mark.Temporary);
+                marks.Add(vertex.Id, Mark.Temporary);
             }
 
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
             {
-                if (!VisitDownstream(nextVertex, sortedGuids, ref head, componentGraph, marks))
+                if (!VisitDownstream(nextVertex, sortedVertices, ref head, componentGraph, marks))
                 {
                     // Graph is not acyclic
                     return false;
@@ -135,10 +109,12 @@ namespace Barotrauma_Circuit_Resolver.Util
             }
 
             // Assign permanent mark
-            marks[vertex.Guid] = Mark.Permanent;
+            marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            sortedGuids[head--] = vertex.Guid;
+            sortedVertices[head--] = vertex;
+
+            System.Diagnostics.Debug.WriteLine("Storing \t" + vertex);
 
             return true;
         }
@@ -146,28 +122,28 @@ namespace Barotrauma_Circuit_Resolver.Util
         public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
         {
             // Create GUID list for sorted vertices
-            Guid[] sortedGuids = new Guid[componentGraph.VertexCount];
+            Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
             int head = componentGraph.VertexCount-1;
 
             // Create Dictionary to allow marking of vertices
-            Dictionary<Guid, Mark> marks = new Dictionary<Guid, Mark>();
+            Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
 
             // Create Dictionary to find Vertices using GUIDs
-            Dictionary<Guid, Vertex> Vertices = new Dictionary<Guid, Vertex>();
+            Dictionary<int, Vertex> Vertices = new Dictionary<int, Vertex>();
             foreach (Vertex vertex in componentGraph.Vertices)
             {
-                Vertices.Add(vertex.Guid, vertex);
+                Vertices.Add(vertex.Id, vertex);
             }
 
             // Visit first unmarked Vertex
-            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
+            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             while (!(first is null)) 
             {
-                if(!VisitDownstream(first, sortedGuids, ref head, componentGraph, marks))
+                if(!VisitDownstream(first, sortedVertices, ref head, componentGraph, marks))
                 {
                     return componentGraph;
                 }
-                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Guid));
+                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 
             // Create sorted list of IDs
@@ -178,7 +154,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             int i = 0;
             foreach (var id in sortedIds)
             {
-                Vertices[sortedGuids[i++]].Id = id;
+                Vertices[sortedVertices[i++].Id].Id = id;
             }
 
             return componentGraph;
