@@ -11,14 +11,18 @@ namespace Barotrauma_Circuit_Resolver.Util
         private string name;
         private HashSet<Edge<Vertex>> outgoingEdges;
         private HashSet<Edge<Vertex>> incomingEdges;
-        private Guid guid;
+
+        public Vertex(int id)
+        {
+            new Vertex(id, id.ToString());
+        }
+
         public Vertex(int id, string name)
         {
             Id = id;
             Name = name;
             OutgoingEdges = new HashSet<Edge<Vertex>>();
             IncomingEdges = new HashSet<Edge<Vertex>>();
-            guid = Guid.NewGuid();
         }
 
         public int Id { get => id; set => id = value; }
@@ -26,8 +30,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public int Order => Edges.Count();
         internal HashSet<Edge<Vertex>> OutgoingEdges { get => outgoingEdges; set => outgoingEdges = value; }
         internal HashSet<Edge<Vertex>> IncomingEdges { get => incomingEdges; set => incomingEdges = value; }
-        internal HashSet<Edge<Vertex>> Edges => (HashSet<Edge<Vertex>>)OutgoingEdges.Union(IncomingEdges);
-        public Guid Guid => guid;
+        internal HashSet<Edge<Vertex>> Edges => OutgoingEdges.Union(IncomingEdges).ToHashSet();
 
         public override bool Equals(object obj)
         {
@@ -59,15 +62,11 @@ namespace Barotrauma_Circuit_Resolver.Util
 
     public class Edge<TVertex> : IEdge<TVertex>
     {
-        private int id;
-        private string name;
         private readonly TVertex source;
         private readonly TVertex target;
 
-        public Edge(int id, string name, TVertex source, TVertex target)
+        public Edge(TVertex source, TVertex target)
         {
-            Id = id;
-            Name = name;
             this.source = source;
             this.target = target;
         }
@@ -76,18 +75,24 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public TVertex Target => target;
 
-        public string Name { get => name; set => name = value; }
-        public int Id { get => id; set => id = value; }
+        public string Name => ToString();
 
         public override string ToString()
         {
-            return string.Format("{0}_{1}", Name, Id);
+            return string.Format("{0}-{1}", Source.ToString(), Target.ToString());
         }
 
         public override bool Equals(object obj)
         {
             return obj is Edge<TVertex> edge &&
-                   Id == edge.Id;
+                   EqualityComparer<TVertex>.Default.Equals(source, edge.source) &&
+                   EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
+                   EqualityComparer<TVertex>.Default.Equals(Target, edge.Target);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Source, Target);
         }
 
         public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs)
@@ -100,9 +105,5 @@ namespace Barotrauma_Circuit_Resolver.Util
             return !lhs.Equals(rhs);
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Id);
-        }
     }
 }
