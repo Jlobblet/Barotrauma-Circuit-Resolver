@@ -81,7 +81,6 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static void SortVertexIDs(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            var Guids = graph.Vertices.Select(v => v.Guid);
             var Ids = graph.Vertices.Select(v => v.Id);
             var SortedIds = Ids.OrderBy(i => i);
 
