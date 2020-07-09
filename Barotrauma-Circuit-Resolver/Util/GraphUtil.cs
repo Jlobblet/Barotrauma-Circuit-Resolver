@@ -1,6 +1,7 @@
 ﻿using QuickGraph;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -71,7 +72,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
-        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
+        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, ref int tail, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
         {
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
@@ -99,7 +100,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
             {
-                if (!VisitDownstream(nextVertex, sortedVertices, ref head, componentGraph, marks))
+                if (!VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks))
                 {
                     // Graph is not acyclic
                     return false;
@@ -110,7 +111,15 @@ namespace Barotrauma_Circuit_Resolver.Util
             marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            sortedVertices[head--] = vertex;
+            if(vertex.Name == "memorycomponent")
+            {
+                // Update memory components in reverse order
+                sortedVertices[tail++] = vertex;
+            }
+            else
+            {
+                sortedVertices[head--] = vertex;
+            }
 
             return true;
         }
@@ -120,22 +129,16 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Create GUID list for sorted vertices
             Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
             int head = componentGraph.VertexCount-1;
+            int tail = 0;
 
             // Create Dictionary to allow marking of vertices
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
-
-            // Create Dictionary to find Vertices using GUIDs
-            Dictionary<int, Vertex> Vertices = new Dictionary<int, Vertex>();
-            foreach (Vertex vertex in componentGraph.Vertices)
-            {
-                Vertices.Add(vertex.Id, vertex);
-            }
 
             // Visit first unmarked Vertex
             Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             while (!(first is null)) 
             {
-                if(!VisitDownstream(first, sortedVertices, ref head, componentGraph, marks))
+                if(!VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks))
                 {
                     return componentGraph;
                 }
@@ -150,7 +153,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             int i = 0;
             foreach (var id in sortedIds)
             {
-                Vertices[sortedVertices[i++].Id].Id = id;
+                sortedVertices[i++].Id = id;
             }
 
             return componentGraph;
