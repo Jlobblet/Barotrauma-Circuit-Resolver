@@ -73,8 +73,6 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
         {
-            System.Diagnostics.Debug.WriteLine("Evaluating \t" + vertex);
-
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
             {
@@ -113,8 +111,6 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             // Prepend n to sortedGuids
             sortedVertices[head--] = vertex;
-
-            System.Diagnostics.Debug.WriteLine("Storing \t" + vertex);
 
             return true;
         }
