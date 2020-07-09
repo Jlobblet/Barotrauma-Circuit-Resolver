@@ -11,7 +11,6 @@ namespace Barotrauma_Circuit_Resolver.Util
         private string name;
         private HashSet<Edge<Vertex>> outgoingEdges;
         private HashSet<Edge<Vertex>> incomingEdges;
-        private Guid guid;
 
         public Vertex(int id)
         {
@@ -24,7 +23,6 @@ namespace Barotrauma_Circuit_Resolver.Util
             Name = name;
             OutgoingEdges = new HashSet<Edge<Vertex>>();
             IncomingEdges = new HashSet<Edge<Vertex>>();
-            guid = Guid.NewGuid();
         }
 
         public int Id { get => id; set => id = value; }
@@ -33,7 +31,6 @@ namespace Barotrauma_Circuit_Resolver.Util
         internal HashSet<Edge<Vertex>> OutgoingEdges { get => outgoingEdges; set => outgoingEdges = value; }
         internal HashSet<Edge<Vertex>> IncomingEdges { get => incomingEdges; set => incomingEdges = value; }
         internal HashSet<Edge<Vertex>> Edges => OutgoingEdges.Union(IncomingEdges).ToHashSet();
-        public Guid Guid => guid;
 
         public override bool Equals(object obj)
         {
