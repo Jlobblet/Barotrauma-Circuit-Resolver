@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Barotrauma_Circuit_Resolver.Util
@@ -67,17 +66,17 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static void SortVertexIDs(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            var Ids = graph.Vertices.Select(v => v.Id);
-            var SortedIds = Ids.OrderBy(i => i);
+            IEnumerable<int> Ids = graph.Vertices.Select(v => v.Id);
+            IOrderedEnumerable<int> SortedIds = Ids.OrderBy(i => i);
 
-            var EdgesBefore = graph.Edges;
+            IEnumerable<Edge<Vertex>> EdgesBefore = graph.Edges;
 
             foreach ((Vertex v, int newId) in graph.Vertices.Zip(SortedIds))
             {
                 v.Id = newId;
             }
 
-            var EdgesAfter = graph.Edges;
+            IEnumerable<Edge<Vertex>> EdgesAfter = graph.Edges;
         }
     }
 }
