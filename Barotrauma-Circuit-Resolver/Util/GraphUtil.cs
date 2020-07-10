@@ -72,6 +72,12 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> PreprocessGraph(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        {
+            graph.RemoveEdgeIf(e => e.Source.Name != "memorycomponent" && e.Target.Name == "memorycomponent");
+            return graph;
+        }
+
         public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, ref int tail, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
         {
             // Assign the new IDs to the vertices
@@ -100,11 +106,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
             {
-                if (!VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks))
-                {
-                    // Graph is not acyclic
-                    return false;
-                }
+                VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks);
             }
 
             // Assign permanent mark
@@ -134,14 +136,14 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Create Dictionary to allow marking of vertices
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
 
+            // Remove loops containing memory from graph
+            componentGraph.PreprocessGraph();
+
             // Visit first unmarked Vertex
             Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             while (!(first is null)) 
             {
-                if(!VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks))
-                {
-                    return componentGraph;
-                }
+                VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks);
                 first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 

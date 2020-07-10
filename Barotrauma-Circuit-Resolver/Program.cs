@@ -17,7 +17,7 @@ namespace Barotrauma_Circuit_Resolver
         private static void Main()
         {
 #if DEBUG
-            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/graph_tests_acyclic.sub";
+            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/graph_tests.sub";
             const string outputFile = "output.graphml";
 
             XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
