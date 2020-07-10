@@ -1,11 +1,18 @@
-﻿using System.IO;
+﻿using Barotrauma_Circuit_Resolver.Util;
+using QuickGraph;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace Barotrauma_Circuit_Resolver
 {
     public static class SaveUtil
     {
+
         public static XDocument LoadSubmarine(string filepath)
         {
             using FileStream fileStream = new FileStream(filepath, FileMode.Open);
@@ -26,6 +33,39 @@ namespace Barotrauma_Circuit_Resolver
             using FileStream fileStream = new FileStream(filepath, FileMode.OpenOrCreate);
             using GZipStream gZipStream = new GZipStream(fileStream, CompressionMode.Compress, false);
             gZipStream.Write(b, 0, b.Length);
+        }
+
+        public static void UpdateSubmarineIDs(XDocument submarine, AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph, IEnumerable<Vertex> SortedVertices)
+        {
+            const string xpath = "//Item/@ID|//link/@w";
+
+            IEnumerable<(int First, int Second)> ids = graph.Vertices.Select(v => v.Id).Zip(SortedVertices.Select(v => v.Id));
+            IEnumerable<Triplet<int, string, int>> IdChangeTriplet = ids.Select(e => new Triplet<int, string, int>(e.First, SortedVertices.First(v => v.Id == e.First).GetStringHashCode(), e.Second));
+
+            foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
+            {
+                if (xObject is XAttribute attribute)
+                {
+                    int Id = int.Parse(attribute.Value);
+                    if (IdChangeTriplet.Any(t => t.First == Id))
+                    {
+                        attribute.Value = IdChangeTriplet.First(t => t.First == Id).Second;
+                    }
+                }
+            }
+
+            foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
+            {
+                if (xObject is XAttribute attribute)
+                {
+                    string Hash = attribute.Value;
+                    if (IdChangeTriplet.Any(t => t.Second == Hash))
+                    {
+                        attribute.Value = IdChangeTriplet.First(t => t.Second == Hash).Third.ToString();
+                    }
+                }
+            }
+
         }
     }
 }

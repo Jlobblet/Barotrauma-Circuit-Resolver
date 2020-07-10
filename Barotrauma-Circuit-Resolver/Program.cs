@@ -1,10 +1,14 @@
 using Barotrauma_Circuit_Resolver.Util;
 using QuickGraph;
+using QuickGraph.Algorithms;
 using QuickGraph.Serialization;
 using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace Barotrauma_Circuit_Resolver
 {
@@ -27,6 +31,7 @@ namespace Barotrauma_Circuit_Resolver
             graph.SolveUpdateOrder();
 
             VertexIdentity<Vertex> vertexIdentity = new VertexIdentity<Vertex>(v => v.ToString());
+            SaveUtil.SaveSubmarine(submarine, "output.sub");
             EdgeIdentity<Vertex, Util.Edge<Vertex>> edgeIdentiter = new EdgeIdentity<Vertex, Util.Edge<Vertex>>(e => e.ToString());
 
             if (File.Exists(outputFile))

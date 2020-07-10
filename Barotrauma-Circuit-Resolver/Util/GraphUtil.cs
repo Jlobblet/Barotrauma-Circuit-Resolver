@@ -35,18 +35,18 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static IEnumerable<Edge<Vertex>> GetEdges(this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            return graph.Vertices.Select(s => submarine.GetNextVertices(s).Select(t => new Edge<Vertex>(s, graph.Vertices.First(v => v.Id == t.Id))))
+            return graph.Vertices.Select(s => submarine.GetNextIDs(s).Select(i => new Edge<Vertex>(s, graph.Vertices.Where(v => v.Id == i).First())))
                                  .SelectMany(e => e).Distinct();
         }
 
-        public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, Vertex vertex)
+        public static IEnumerable<int> GetNextIDs(this XDocument submarine, Vertex vertex)
         {
-            return submarine.GetNextVertices(submarine.Root.Elements()
+            return submarine.GetNextIDs(submarine.Root.Elements()
                 .Where(e => e.Attribute("ID").Value == vertex.Id.ToString())
                 .First());
         }
 
-        public static IEnumerable<Vertex> GetNextVertices(this XDocument submarine, XElement element)
+        public static IEnumerable<int> GetNextIDs(this XDocument submarine, XElement element)
         {
             return submarine.Root.Elements()
                 .Where(e => element.Descendants("output").Where(FilterPower).Elements("link")
@@ -54,7 +54,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                     .Intersect(e.Descendants("input").Elements("link")
                         .Select(i => i.Attribute("w").Value))
                     .Any())
-                .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
+                .Select(e => int.Parse(e.Attribute("ID").Value));
         }
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
@@ -148,12 +148,12 @@ namespace Barotrauma_Circuit_Resolver.Util
             }
 
             // Create sorted list of IDs
-            var idPool = componentGraph.Vertices.Select(v => v.Id);
-            var sortedIds = idPool.OrderBy(i => i);
+            IEnumerable<int> idPool = componentGraph.Vertices.Select(v => v.Id);
+            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(i => i);
 
             // Apply list to graph
             int i = 0;
-            foreach (var id in sortedIds)
+            foreach (int id in sortedIds)
             {
                 sortedVertices[i++].Id = id;
             }

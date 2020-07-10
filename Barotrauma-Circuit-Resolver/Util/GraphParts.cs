@@ -48,6 +48,11 @@ namespace Barotrauma_Circuit_Resolver.Util
             return !lhs.Equals(rhs);
         }
 
+        public string GetStringHashCode()
+        {
+            return $"{{{GetHashCode()}}}";
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(Id);
