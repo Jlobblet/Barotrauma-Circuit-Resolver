@@ -59,7 +59,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public override string ToString()
         {
-            return string.Format("{0}_{1}", Name, Id);
+            return $"{Name}_{Id}";
         }
 
     }
@@ -80,7 +80,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public override string ToString()
         {
-            return string.Format("{0}-{1}", Source.ToString(), Target.ToString());
+            return $"{Source.ToString()}-{Target.ToString()}";
         }
 
         public override bool Equals(object obj)
