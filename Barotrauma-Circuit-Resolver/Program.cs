@@ -1,11 +1,5 @@
-using Barotrauma_Circuit_Resolver.Util;
-using QuickGraph;
-using QuickGraph.Algorithms;
-using QuickGraph.Serialization;
 using System;
-using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
@@ -31,7 +25,7 @@ namespace Barotrauma_Circuit_Resolver
             QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
-            graph.SolveUpdateOrder();
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
 
             static string VertexIdentity(Vertex v) => v.ToString();
 
