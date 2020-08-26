@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
+using QuickGraph;
 using QuickGraph.Serialization;
 
 namespace Barotrauma_Circuit_Resolver
@@ -16,39 +18,20 @@ namespace Barotrauma_Circuit_Resolver
         private static void Main(string[] args)
         {
 #if DEBUG
-            string inputSub = args[0];
-            string outputSub = args[1];
-            string outputFile = args[2];
-
-            XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
-
-            QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph =
-                submarine.CreateComponentGraph();
-
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
-
-            static string VertexIdentity(Vertex v) => v.ToString();
-
-            SaveUtil.SaveSubmarine(submarine, outputSub);
-
-            static string EdgeIdentifier(Edge<Vertex> e) => e.ToString();
-
-            if (File.Exists(outputFile))
+            if (args.Length > 1)
             {
-                File.Delete(outputFile);
+                var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(args[0]);
+                resolvedSubmarine.Save(args[1]);
+                if (args.Length > 2)
+                {
+                    graph.SaveGraphML(args[2]);
+                }
             }
-
-            using FileStream fs = new FileStream(outputFile, FileMode.OpenOrCreate);
-            using XmlWriter xw = XmlWriter.Create(fs);
-            graph.SerializeToGraphML(xw, VertexIdentity,
-                                     (QuickGraph.EdgeIdentity<Vertex, Edge<Vertex>>)
-                                     EdgeIdentifier);
-#else
+#endif
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
-#endif
+            Application.Run(new SubResolverForm());
         }
     }
 }
