@@ -63,7 +63,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public TVertex Target { get; }
 
-        public override string ToString() => $"{Source.ToString()}-{Target.ToString()}";
+        public override string ToString() => $"{Source}-{Target}";
 
         public override bool Equals(object obj) =>
             obj is Edge<TVertex> edge &&
