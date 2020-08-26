@@ -29,7 +29,7 @@ namespace Barotrauma_Circuit_Resolver
             string outputFilepath = NewSubCheckBox.Checked ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                 Path.GetFileNameWithoutExtension(inputFilepath) + "_resolved.sub") : inputFilepath;
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + "_graphml");
+                Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
             var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
             resolvedSubmarine.Save(outputFilepath);
             graph.SaveGraphML(graphFilepath);
