@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using QuickGraph;
+using QuickGraph.Serialization;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -37,7 +39,25 @@ namespace Barotrauma_Circuit_Resolver.Util
             gZipStream.Write(b, 0, b.Length);
         }
 
-        public static void UpdateSubmarineIDs(XDocument submarine,
+        public static void SaveGraphML(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, string filepath)
+        {
+            if (File.Exists(filepath))
+            {
+                File.Delete(filepath);
+            }
+
+            static string VertexIdentity(Vertex v) => v.ToString();
+            static string EdgeIdentifier(Util.Edge<Vertex> e) => e.ToString();
+
+            using FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate);
+            using XmlWriter xw = XmlWriter.Create(fs);
+            graph.SerializeToGraphML(xw, VertexIdentity,
+                (EdgeIdentity<Vertex, Edge<Vertex>>)
+                EdgeIdentifier);
+
+        }
+
+        public static void UpdateSubmarineIDs(this XDocument submarine,
                                               AdjacencyGraph<Vertex, Edge<Vertex>>
                                                   graph,
                                               IEnumerable<Vertex> sortedVertices)
