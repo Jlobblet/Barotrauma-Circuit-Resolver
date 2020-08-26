@@ -62,7 +62,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                 .Select(e => int.Parse(e.Attribute("ID")?.Value!));
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(this XDocument submarine)
         {
             AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
             graph.EdgeAdded += Graph_EdgeAdded;
