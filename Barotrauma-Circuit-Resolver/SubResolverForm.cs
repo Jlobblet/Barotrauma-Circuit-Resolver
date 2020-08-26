@@ -18,6 +18,7 @@ namespace Barotrauma_Circuit_Resolver
         {
             string result = FormUtils.ShowFileBrowserDialog();
             if (result == "") return;
+            FilepathTextBox.Text = result;
             XDocument sub = SaveUtil.LoadSubmarine(result);
             pictureBox1.Image = FormUtils.GetImageFromString(sub.Root?.Attribute("previewimage")?.Value);
         }
