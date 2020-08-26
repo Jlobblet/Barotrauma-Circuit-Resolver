@@ -163,16 +163,15 @@ namespace Barotrauma_Circuit_Resolver.Util
             this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph,
             out Vertex[] sortedVertices)
         {
-            // Create GUID list for sorted vertices
+            // Remove loops containing memory from graph
+            componentGraph.PreprocessGraph();
+            // Create Vertex list for sorted vertices
             sortedVertices = new Vertex[componentGraph.VertexCount];
-            int head = componentGraph.VertexCount-1;
+            int head = componentGraph.VertexCount - 1;
             int tail = 0;
 
             // Create Dictionary to allow marking of vertices
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
-
-            // Remove loops containing memory from graph
-            componentGraph.PreprocessGraph();
 
             // Visit first unmarked Vertex
             Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
@@ -182,15 +181,12 @@ namespace Barotrauma_Circuit_Resolver.Util
                 first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 
-            // Create sorted list of IDs
-            IOrderedEnumerable<int> sortedIds =
-                componentGraph.Vertices.Select(v => v.Id).OrderBy(id => id);
-
-            // Apply list to graph
-            int i = 0;
-            foreach (int id in sortedIds)
+            // Apply sorted list of IDs to graph
+            foreach ((int id, int i) in componentGraph.Vertices
+                                                      .Select((v, i) => (v.Id, i))
+                                                      .OrderBy(t => t.Id))
             {
-                sortedVertices[i++].Id = id;
+                sortedVertices[i].Id = id;
             }
 
             return componentGraph;
