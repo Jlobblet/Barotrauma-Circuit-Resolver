@@ -21,7 +21,7 @@ namespace Barotrauma_Circuit_Resolver
             if (args.Length > 1)
             {
                 var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(args[0]);
-                resolvedSubmarine.Save(args[1]);
+                resolvedSubmarine.SaveSubmarine(args[1]);
                 if (args.Length > 2)
                 {
                     graph.SaveGraphML(args[2]);

@@ -31,7 +31,7 @@ namespace Barotrauma_Circuit_Resolver
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                 Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
             var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
-            resolvedSubmarine.Save(outputFilepath);
+            resolvedSubmarine.SaveSubmarine(outputFilepath);
             graph.SaveGraphML(graphFilepath);
         }
 
