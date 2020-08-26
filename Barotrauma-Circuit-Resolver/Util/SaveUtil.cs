@@ -15,16 +15,15 @@ namespace Barotrauma_Circuit_Resolver.Util
     {
         public static XDocument LoadSubmarine(string filepath)
         {
-            using FileStream fileStream = new FileStream(filepath, FileMode.Open);
-            using GZipStream gZipStream =
-                new GZipStream(fileStream, CompressionMode.Decompress);
+            using FileStream fileSteam = new FileStream(filepath, FileMode.Open);
+            using GZipStream gZipStream = new GZipStream(fileSteam, CompressionMode.Decompress);
             return XDocument.Load(gZipStream);
         }
 
-        public static void SaveSubmarine(XDocument submarine, string filepath)
+        public static void SaveSubmarine(this XDocument sub, string fileName)
         {
             string temp = Path.GetTempFileName();
-            File.WriteAllText(temp, submarine.ToString());
+            File.WriteAllText(temp, sub.ToString());
             byte[] b;
             using (FileStream fs = new FileStream(temp, FileMode.Open))
             {
@@ -32,13 +31,13 @@ namespace Barotrauma_Circuit_Resolver.Util
                 fs.Read(b, 0, (int)fs.Length);
             }
 
-            using FileStream fileStream =
-                new FileStream(filepath, FileMode.OpenOrCreate);
-            using GZipStream gZipStream =
-                new GZipStream(fileStream, CompressionMode.Compress, false);
-            gZipStream.Write(b, 0, b.Length);
+            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+            using (GZipStream gz = new GZipStream(fs, CompressionMode.Compress, false))
+            {
+                gz.Write(b, 0, b.Length);
+            }
         }
-
+        
         public static void SaveGraphML(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, string filepath)
         {
             if (File.Exists(filepath))
