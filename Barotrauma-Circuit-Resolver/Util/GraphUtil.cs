@@ -77,24 +77,29 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
-        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
+        public static bool VisitDownstream(Vertex vertex,
+                                           Vertex[] sortedVertices,
+                                           ref int head,
+                                           Dictionary<int, Mark> marks)
         {
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
             {
-                if (marks[vertex.Id] == Mark.Permanent)
+                switch (marks[vertex.Id])
                 {
-                    // End of branch
-                    return true;
+                    case Mark.Permanent:
+                        // End of branch
+                        return true;
+                    case Mark.Temporary:
+                        // Graph is not Acyclic
+                        return false;
+                    case Mark.Unmarked:
+                        break;
+                    default:
+                        //Assign temporary mark
+                        marks[vertex.Id] = Mark.Temporary;
+                        break;
                 }
-                if (marks[vertex.Id] == Mark.Temporary)
-                {
-                    // Graph is not Acyclic
-                    return false;
-                }
-
-                //Assign temporary mark
-                marks[vertex.Id] = Mark.Temporary;
             }
             else
             {
@@ -105,7 +110,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
             {
-                if (!VisitDownstream(nextVertex, sortedVertices, ref head, componentGraph, marks))
+                if (!VisitDownstream(nextVertex, sortedVertices, ref head, marks))
                 {
                     // Graph is not acyclic
                     return false;
@@ -121,7 +126,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             return true;
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
+        public static void SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
         {
             // Create GUID list for sorted vertices
             Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
@@ -131,35 +136,29 @@ namespace Barotrauma_Circuit_Resolver.Util
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
 
             // Create Dictionary to find Vertices using GUIDs
-            Dictionary<int, Vertex> Vertices = new Dictionary<int, Vertex>();
-            foreach (Vertex vertex in componentGraph.Vertices)
-            {
-                Vertices.Add(vertex.Id, vertex);
-            }
+            Dictionary<int, Vertex> vertices = componentGraph.Vertices.ToDictionary(vertex => vertex.Id);
 
             // Visit first unmarked Vertex
             Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             while (!(first is null))
             {
-                if (!VisitDownstream(first, sortedVertices, ref head, componentGraph, marks))
+                if (!VisitDownstream(first, sortedVertices, ref head, marks))
                 {
-                    return componentGraph;
+                    return;
                 }
                 first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 
             // Create sorted list of IDs
             IEnumerable<int> idPool = componentGraph.Vertices.Select(v => v.Id);
-            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(i => i);
+            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(id => id);
 
             // Apply list to graph
             int i = 0;
             foreach (int id in sortedIds)
             {
-                Vertices[sortedVertices[i++].Id].Id = id;
+                vertices[sortedVertices[i++].Id].Id = id;
             }
-
-            return componentGraph;
         }
     }
 }
