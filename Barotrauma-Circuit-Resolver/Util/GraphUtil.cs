@@ -1,8 +1,7 @@
-﻿using QuickGraph;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using QuickGraph;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -12,15 +11,14 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             Unmarked,
             Temporary,
-            Permanent
+            Permanent,
         }
 
-        private static readonly string[] PowerConnections = { "power", "power_in", "power_out" };
+        private static readonly string[] PowerConnections =
+            {"power", "power_in", "power_out"};
 
-        private static bool FilterPower(XElement elt)
-        {
-            return !PowerConnections.Contains(elt.Attribute("name")?.Value);
-        }
+        private static bool FilterPower(XElement elt) =>
+            !PowerConnections.Contains(elt.Attribute("name")?.Value);
 
         public static IEnumerable<Vertex> GetComponents(this XDocument submarine)
         {
@@ -30,41 +28,56 @@ namespace Barotrauma_Circuit_Resolver.Util
                                          .Where(FilterPower)
                                          .Elements("link")
                                          .Any())
-                            .Select(e => new Vertex(int.Parse(e.Attribute("ID")?.Value!), e.Attribute("identifier")?.Value));
+                            .Select(e =>
+                                        new Vertex(int.Parse(e.Attribute("ID")?.Value!),
+                                                   e.Attribute("identifier")?.Value));
         }
 
-        public static IEnumerable<Edge<Vertex>> GetEdges(this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        public static IEnumerable<Edge<Vertex>> GetEdges(
+            this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
             return graph.Vertices.Select(s => submarine.GetNextIDs(s)
                                                        .Select(i =>
-                                                           new Edge<Vertex>(s,
+                                                           new Edge<Vertex
+                                                           >(s,
                                                                graph
                                                                    .Vertices
-                                                                   .First(v => v.Id == i))))
+                                                                   .First(v =>
+                                                                       v.Id ==
+                                                                       i))))
                         .SelectMany(e => e)
                         .Distinct();
         }
 
-        public static IEnumerable<int> GetNextIDs(this XDocument submarine, Vertex vertex)
+        public static IEnumerable<int> GetNextIDs(this XDocument submarine,
+                                                  Vertex vertex)
         {
             return submarine.GetNextIDs(submarine.Root?.Elements()
-                                                 .First(e => e.Attribute("ID")?.Value == vertex.Id.ToString()));
+                                                 .First(e => e.Attribute("ID")?.Value ==
+                                                            vertex.Id.ToString()));
         }
 
-        public static IEnumerable<int> GetNextIDs(this XDocument submarine, XElement element)
+        public static IEnumerable<int> GetNextIDs(this XDocument submarine,
+                                                  XElement element)
         {
             return submarine.Root?.Elements()
-                .Where(e => element.Descendants("output").Where(FilterPower).Elements("link")
-                    .Select(e2 => e2.Attribute("w")?.Value)
-                    .Intersect(e.Descendants("input").Elements("link")
-                        .Select(i => i.Attribute("w")?.Value))
-                    .Any())
-                .Select(e => int.Parse(e.Attribute("ID")?.Value!));
+                            .Where(e => element
+                                        .Descendants("output").Where(FilterPower)
+                                        .Elements("link")
+                                        .Select(e2 => e2.Attribute("w")?.Value)
+                                        .Intersect(e.Descendants("input")
+                                                    .Elements("link")
+                                                    .Select(i => i.Attribute("w")
+                                                        ?.Value))
+                                        .Any())
+                            .Select(e => int.Parse(e.Attribute("ID")?.Value!));
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(this XDocument submarine)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(
+            this XDocument submarine)
         {
-            AdjacencyGraph<Vertex, Edge<Vertex>> graph = new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph =
+                new AdjacencyGraph<Vertex, Edge<Vertex>>(false);
             graph.EdgeAdded += Graph_EdgeAdded;
             graph.AddVertexRange(submarine.GetComponents());
             graph.AddEdgeRange(submarine.GetEdges(graph));
@@ -126,7 +139,8 @@ namespace Barotrauma_Circuit_Resolver.Util
             return true;
         }
 
-        public static void SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
+        public static void SolveUpdateOrder(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
         {
             // Create GUID list for sorted vertices
             Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
@@ -136,17 +150,23 @@ namespace Barotrauma_Circuit_Resolver.Util
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
 
             // Create Dictionary to find Vertices using GUIDs
-            Dictionary<int, Vertex> vertices = componentGraph.Vertices.ToDictionary(vertex => vertex.Id);
+            Dictionary<int, Vertex> vertices =
+                componentGraph.Vertices.ToDictionary(vertex => vertex.Id);
 
             // Visit first unmarked Vertex
-            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
+            Vertex first =
+                componentGraph.Vertices.FirstOrDefault(vertex =>
+                                                           !marks
+                                                               .ContainsKey(vertex.Id));
             while (!(first is null))
             {
                 if (!VisitDownstream(first, sortedVertices, ref head, marks))
                 {
                     return;
                 }
-                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
+
+                first = componentGraph.Vertices.FirstOrDefault(vertex =>
+                    !marks.ContainsKey(vertex.Id));
             }
 
             // Create sorted list of IDs

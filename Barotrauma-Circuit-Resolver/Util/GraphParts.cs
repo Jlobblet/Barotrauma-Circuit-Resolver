@@ -1,7 +1,7 @@
-﻿using QuickGraph;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QuickGraph;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -29,39 +29,24 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         internal HashSet<Edge<Vertex>> IncomingEdges { get; set; }
 
-        internal HashSet<Edge<Vertex>> Edges => OutgoingEdges.Union(IncomingEdges).ToHashSet();
+        internal HashSet<Edge<Vertex>> Edges =>
+            OutgoingEdges.Union(IncomingEdges).ToHashSet();
 
-        public override bool Equals(object obj)
-        {
-            return obj is Vertex vertex &&
-                   Id == vertex.Id;
-        }
+        public override bool Equals(object obj) =>
+            obj is Vertex vertex &&
+            Id == vertex.Id;
 
-        public static bool operator ==(Vertex lhs, Vertex rhs)
-        {
-            return lhs is { } && lhs.Equals(rhs);
-        }
+        public static bool operator ==(Vertex lhs, Vertex rhs) =>
+            lhs is { } && lhs.Equals(rhs);
 
-        public static bool operator !=(Vertex lhs, Vertex rhs)
-        {
-            return lhs is { } && !lhs.Equals(rhs);
-        }
+        public static bool operator !=(Vertex lhs, Vertex rhs) =>
+            lhs is { } && !lhs.Equals(rhs);
 
-        public string GetStringHashCode()
-        {
-            return $"{{{GetHashCode()}}}";
-        }
+        public string GetStringHashCode() => $"{{{GetHashCode()}}}";
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Id);
-        }
+        public override int GetHashCode() => HashCode.Combine(Id);
 
-        public override string ToString()
-        {
-            return $"{Name}_{Id}";
-        }
-
+        public override string ToString() => $"{Name}_{Id}";
     }
 
     public class Edge<TVertex> : IEdge<TVertex>
@@ -72,39 +57,26 @@ namespace Barotrauma_Circuit_Resolver.Util
             Target = target;
         }
 
+        public string Name => ToString();
+
         public TVertex Source { get; }
 
         public TVertex Target { get; }
 
-        public string Name => ToString();
+        public override string ToString() => $"{Source.ToString()}-{Target.ToString()}";
 
-        public override string ToString()
-        {
-            return $"{Source.ToString()}-{Target.ToString()}";
-        }
+        public override bool Equals(object obj) =>
+            obj is Edge<TVertex> edge &&
+            EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
+            EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
+            EqualityComparer<TVertex>.Default.Equals(Target, edge.Target);
 
-        public override bool Equals(object obj)
-        {
-            return obj is Edge<TVertex> edge &&
-                   EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
-                   EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
-                   EqualityComparer<TVertex>.Default.Equals(Target, edge.Target);
-        }
+        public override int GetHashCode() => HashCode.Combine(Source, Target);
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Source, Target);
-        }
+        public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs) =>
+            lhs is { } && lhs.Equals(rhs);
 
-        public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs)
-        {
-            return lhs is { } && lhs.Equals(rhs);
-        }
-
-        public static bool operator !=(Edge<TVertex> lhs, Edge<TVertex> rhs)
-        {
-            return lhs is { } && !lhs.Equals(rhs);
-        }
-
+        public static bool operator !=(Edge<TVertex> lhs, Edge<TVertex> rhs) =>
+            lhs is { } && !lhs.Equals(rhs);
     }
 }

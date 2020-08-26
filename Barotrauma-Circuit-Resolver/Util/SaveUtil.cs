@@ -1,22 +1,21 @@
-﻿using Barotrauma_Circuit_Resolver.Util;
-using QuickGraph;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using QuickGraph;
 
-namespace Barotrauma_Circuit_Resolver
+namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class SaveUtil
     {
-
         public static XDocument LoadSubmarine(string filepath)
         {
             using FileStream fileStream = new FileStream(filepath, FileMode.Open);
-            using GZipStream gZipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+            using GZipStream gZipStream =
+                new GZipStream(fileStream, CompressionMode.Decompress);
             return XDocument.Load(gZipStream);
         }
 
@@ -30,17 +29,28 @@ namespace Barotrauma_Circuit_Resolver
                 b = new byte[fs.Length];
                 fs.Read(b, 0, (int)fs.Length);
             }
-            using FileStream fileStream = new FileStream(filepath, FileMode.OpenOrCreate);
-            using GZipStream gZipStream = new GZipStream(fileStream, CompressionMode.Compress, false);
+
+            using FileStream fileStream =
+                new FileStream(filepath, FileMode.OpenOrCreate);
+            using GZipStream gZipStream =
+                new GZipStream(fileStream, CompressionMode.Compress, false);
             gZipStream.Write(b, 0, b.Length);
         }
 
-        public static void UpdateSubmarineIDs(XDocument submarine, AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph, IEnumerable<Vertex> SortedVertices)
+        public static void UpdateSubmarineIDs(XDocument submarine,
+                                              AdjacencyGraph<Vertex, Edge<Vertex>>
+                                                  graph,
+                                              IEnumerable<Vertex> sortedVertices)
         {
             const string xpath = "//Item/@ID|//link/@w";
 
-            IEnumerable<(int First, int Second)> ids = graph.Vertices.Select(v => v.Id).Zip(SortedVertices.Select(v => v.Id));
-            IEnumerable<Triplet<int, string, int>> idChangeTriplet = ids.Select(e => new Triplet<int, string, int>(e.First, SortedVertices.First(v => v.Id == e.First).GetStringHashCode(), e.Second));
+            IEnumerable<(int First, int Second)> ids = graph.Vertices.Select(v => v.Id)
+                .Zip(sortedVertices.Select(v => v.Id));
+            IEnumerable<Triplet<int, string, int>> idChangeTriplet =
+                ids.Select(e => new Triplet<int, string, int>(e.First,
+                               sortedVertices.First(v => v.Id == e.First)
+                                             .GetStringHashCode(),
+                               e.Second));
 
             foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
             {
@@ -58,16 +68,18 @@ namespace Barotrauma_Circuit_Resolver
 
             foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
             {
-                if (xObject is XAttribute attribute)
+                if (!(xObject is XAttribute attribute))
                 {
-                    string Hash = attribute.Value;
-                    if (idChangeTriplet.Any(t => t.Second == Hash))
-                    {
-                        attribute.Value = idChangeTriplet.First(t => t.Second == Hash).Third.ToString();
-                    }
+                    continue;
+                }
+
+                string hash = attribute.Value;
+                if (idChangeTriplet.Any(t => t.Second == hash))
+                {
+                    attribute.Value = idChangeTriplet.First(t => t.Second == hash).Third
+                                                     .ToString();
                 }
             }
-
         }
     }
 }
