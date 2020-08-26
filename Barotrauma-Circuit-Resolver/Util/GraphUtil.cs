@@ -38,13 +38,11 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             return graph.Vertices.Select(s => submarine.GetNextIDs(s)
                                                        .Select(i =>
-                                                           new Edge<Vertex
-                                                           >(s,
+                                                           new Edge<Vertex>(s,
                                                                graph
                                                                    .Vertices
                                                                    .First(v =>
-                                                                       v.Id ==
-                                                                       i))))
+                                                                       v.Id == i))))
                         .SelectMany(e => e)
                         .Distinct();
         }
@@ -90,32 +88,47 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> PreprocessGraph(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        /// <summary>
+        /// Remove all links that go from logic components into data/state storage components.
+        /// (data/storage will be assigned the lowest IDs to be updated first, so these links form no sorting constraint)
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static void PreprocessGraph(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            // Remove all links that go from logic components into data/state storage components.
-            // (data/storage will be assigned the lowest IDs to be upated first, so these links form no sorting constraint)
-            graph.RemoveEdgeIf(e => (e.Source.Name != "memorycomponent" && e.Source.Name != "relaycomponent") && (e.Target.Name == "memorycomponent" || e.Target.Name == "relaycomponent"));
-            return graph;
+            graph.RemoveEdgeIf(e => e.Source.Name != "memorycomponent" &&
+                                    e.Source.Name != "relaycomponent" &&
+                                    (e.Target.Name == "memorycomponent" ||
+                                     e.Target.Name == "relaycomponent"));
         }
 
-        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, ref int tail, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
+        public static bool VisitDownstream(Vertex vertex,
+                                           Vertex[] sortedVertices,
+                                           ref int head,
+                                           ref int tail,
+                                           AdjacencyGraph<Vertex, Edge<Vertex>>
+                                               componentGraph,
+                                           Dictionary<int, Mark> marks)
         {
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
             {
-                if (marks[vertex.Id] == Mark.Permanent)
+                switch (marks[vertex.Id])
                 {
-                    // End of branch
-                    return true;
+                    case Mark.Permanent:
+                        // End of branch
+                        return true;
+                    case Mark.Temporary:
+                        // Graph is not Acyclic
+                        return false;
+                    case Mark.Unmarked:
+                        break;
+                    default:
+                        //Assign temporary mark
+                        marks[vertex.Id] = Mark.Temporary;
+                        break;
                 }
-                if (marks[vertex.Id] == Mark.Temporary)
-                {
-                    // Graph is not Acyclic
-                    return false;
-                }
-
-                //Assign temporary mark
-                marks[vertex.Id] = Mark.Temporary;
             }
             else
             {
@@ -146,7 +159,9 @@ namespace Barotrauma_Circuit_Resolver.Util
             return true;
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, out Vertex[] sortedVertices)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph,
+            out Vertex[] sortedVertices)
         {
             // Create GUID list for sorted vertices
             sortedVertices = new Vertex[componentGraph.VertexCount];
@@ -168,8 +183,8 @@ namespace Barotrauma_Circuit_Resolver.Util
             }
 
             // Create sorted list of IDs
-            IEnumerable<int> idPool = componentGraph.Vertices.Select(v => v.Id);
-            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(i => i);
+            IOrderedEnumerable<int> sortedIds =
+                componentGraph.Vertices.Select(v => v.Id).OrderBy(id => id);
 
             // Apply list to graph
             int i = 0;
