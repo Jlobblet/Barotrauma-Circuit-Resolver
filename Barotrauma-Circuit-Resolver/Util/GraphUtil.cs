@@ -191,5 +191,17 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             return componentGraph;
         }
+        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
+        {
+            XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
+
+            AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
+                submarine.CreateComponentGraph();
+
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
+            submarine.UpdateSubmarineIDs(graph, sortedVertices);
+
+            return (submarine, graph);
+        }
     }
 }
