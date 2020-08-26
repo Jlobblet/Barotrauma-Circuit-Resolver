@@ -39,12 +39,12 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static bool operator ==(Vertex lhs, Vertex rhs)
         {
-            return lhs.Equals(rhs);
+            return lhs is { } && lhs.Equals(rhs);
         }
 
         public static bool operator !=(Vertex lhs, Vertex rhs)
         {
-            return !lhs.Equals(rhs);
+            return lhs is { } && !lhs.Equals(rhs);
         }
 
         public string GetStringHashCode()
@@ -98,12 +98,12 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static bool operator ==(Edge<TVertex> lhs, Edge<TVertex> rhs)
         {
-            return lhs.Equals(rhs);
+            return lhs is { } && lhs.Equals(rhs);
         }
 
         public static bool operator !=(Edge<TVertex> lhs, Edge<TVertex> rhs)
         {
-            return !lhs.Equals(rhs);
+            return lhs is { } && !lhs.Equals(rhs);
         }
 
     }
