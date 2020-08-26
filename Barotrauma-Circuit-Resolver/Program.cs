@@ -30,9 +30,10 @@ namespace Barotrauma_Circuit_Resolver
 
             graph.SolveUpdateOrder();
 
-            VertexIdentity<Vertex> vertexIdentity = new VertexIdentity<Vertex>(v => v.ToString());
+            static string VertexIdentity(Vertex v) => v.ToString();
             SaveUtil.SaveSubmarine(submarine, "output.sub");
-            EdgeIdentity<Vertex, Util.Edge<Vertex>> edgeIdentiter = new EdgeIdentity<Vertex, Util.Edge<Vertex>>(e => e.ToString());
+
+            static string EdgeIdentifier(Util.Edge<Vertex> e) => e.ToString();
 
             if (File.Exists(outputFile))
             {
@@ -41,7 +42,7 @@ namespace Barotrauma_Circuit_Resolver
 
             using FileStream fs = new FileStream(outputFile, FileMode.OpenOrCreate);
             using XmlWriter xw = XmlWriter.Create(fs);
-            graph.SerializeToGraphML(xw, vertexIdentity, edgeIdentiter);
+            graph.SerializeToGraphML(xw, VertexIdentity, (EdgeIdentity<Vertex, Util.Edge<Vertex>>) EdgeIdentifier);
 #else
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
