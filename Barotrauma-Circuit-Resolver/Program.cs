@@ -15,11 +15,12 @@ namespace Barotrauma_Circuit_Resolver
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
 #if DEBUG
-            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/graph_tests_acyclic.sub";
-            const string outputFile = "output.graphml";
+            string inputSub = args[0];
+            string outputSub = args[1];
+            string outputFile = args[2];
 
             XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
 
@@ -28,7 +29,7 @@ namespace Barotrauma_Circuit_Resolver
             graph.SolveUpdateOrder();
 
             static string VertexIdentity(Vertex v) => v.ToString();
-            SaveUtil.SaveSubmarine(submarine, "output.sub");
+            SaveUtil.SaveSubmarine(submarine, outputSub);
 
             static string EdgeIdentifier(Util.Edge<Vertex> e) => e.ToString();
 
