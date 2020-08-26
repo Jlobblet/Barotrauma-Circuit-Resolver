@@ -40,17 +40,19 @@ namespace Barotrauma_Circuit_Resolver
             const string xpath = "//Item/@ID|//link/@w";
 
             IEnumerable<(int First, int Second)> ids = graph.Vertices.Select(v => v.Id).Zip(SortedVertices.Select(v => v.Id));
-            IEnumerable<Triplet<int, string, int>> IdChangeTriplet = ids.Select(e => new Triplet<int, string, int>(e.First, SortedVertices.First(v => v.Id == e.First).GetStringHashCode(), e.Second));
+            IEnumerable<Triplet<int, string, int>> idChangeTriplet = ids.Select(e => new Triplet<int, string, int>(e.First, SortedVertices.First(v => v.Id == e.First).GetStringHashCode(), e.Second));
 
             foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
             {
-                if (xObject is XAttribute attribute)
+                if (!(xObject is XAttribute attribute))
                 {
-                    int Id = int.Parse(attribute.Value);
-                    if (IdChangeTriplet.Any(t => t.First == Id))
-                    {
-                        attribute.Value = IdChangeTriplet.First(t => t.First == Id).Second;
-                    }
+                    continue;
+                }
+
+                int id = int.Parse(attribute.Value);
+                if (idChangeTriplet.Any(t => t.First == id))
+                {
+                    attribute.Value = idChangeTriplet.First(t => t.First == id).Second;
                 }
             }
 
@@ -59,9 +61,9 @@ namespace Barotrauma_Circuit_Resolver
                 if (xObject is XAttribute attribute)
                 {
                     string Hash = attribute.Value;
-                    if (IdChangeTriplet.Any(t => t.Second == Hash))
+                    if (idChangeTriplet.Any(t => t.Second == Hash))
                     {
-                        attribute.Value = IdChangeTriplet.First(t => t.Second == Hash).Third.ToString();
+                        attribute.Value = idChangeTriplet.First(t => t.Second == Hash).Third.ToString();
                     }
                 }
             }
