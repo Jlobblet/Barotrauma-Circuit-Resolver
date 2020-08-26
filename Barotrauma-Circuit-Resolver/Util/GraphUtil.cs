@@ -74,7 +74,9 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> PreprocessGraph(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            graph.RemoveEdgeIf(e => e.Source.Name != "memorycomponent" && e.Target.Name == "memorycomponent");
+            // Remove all links that go from logic components into data/state storage components.
+            // (data/storage will be assigned the lowest IDs to be upated first, so these links form no sorting constraint)
+            graph.RemoveEdgeIf(e => (e.Source.Name != "memorycomponent" && e.Source.Name != "relaycomponent") && (e.Target.Name == "memorycomponent" || e.Target.Name == "relaycomponent"));
             return graph;
         }
 
@@ -113,7 +115,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            if(vertex.Name == "memorycomponent")
+            if(vertex.Name == "memorycomponent" || vertex.Name == "relaycomponent")
             {
                 // Update memory components in reverse order
                 sortedVertices[tail++] = vertex;
@@ -126,10 +128,10 @@ namespace Barotrauma_Circuit_Resolver.Util
             return true;
         }
 
-        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, out Vertex[] sortedVertices)
         {
             // Create GUID list for sorted vertices
-            Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
+            sortedVertices = new Vertex[componentGraph.VertexCount];
             int head = componentGraph.VertexCount-1;
             int tail = 0;
 

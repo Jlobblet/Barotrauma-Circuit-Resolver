@@ -21,17 +21,20 @@ namespace Barotrauma_Circuit_Resolver
         private static void Main()
         {
 #if DEBUG
-            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/graph_tests.sub";
+            const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver-Tests/Data/delays_test_broken.sub";
+            //const string inputSub = "C:/Users/MarketingMark/source/repos/Barotrauma-Circuit-Resolver/Barotrauma-Circuit-Resolver/bin/Debug/netcoreapp3.1/output.sub";
             const string outputFile = "output.graphml";
 
             XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
 
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph = GraphUtil.CreateComponentGraph(submarine);
 
-            graph.SolveUpdateOrder();
+            //Vertex[] sortedvertices;
+            //graph.SolveUpdateOrder(out sortedvertices);
 
             VertexIdentity<Vertex> vertexIdentity = new VertexIdentity<Vertex>(v => v.ToString());
-            SaveUtil.SaveSubmarine(submarine, "output.sub");
+            //SaveUtil.UpdateSubmarineIDs(submarine, graph, sortedvertices);
+            //SaveUtil.SaveSubmarine(submarine, "output.sub");
             EdgeIdentity<Vertex, Util.Edge<Vertex>> edgeIdentiter = new EdgeIdentity<Vertex, Util.Edge<Vertex>>(e => e.ToString());
 
             if (File.Exists(outputFile))
