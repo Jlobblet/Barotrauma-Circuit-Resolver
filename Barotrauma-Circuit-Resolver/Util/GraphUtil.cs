@@ -90,29 +90,32 @@ namespace Barotrauma_Circuit_Resolver.Util
             e.Target.IncomingEdges.Add(e);
         }
 
-        public static bool VisitDownstream(Vertex vertex,
-                                           Vertex[] sortedVertices,
-                                           ref int head,
-                                           Dictionary<int, Mark> marks)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> PreprocessGraph(this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        {
+            // Remove all links that go from logic components into data/state storage components.
+            // (data/storage will be assigned the lowest IDs to be upated first, so these links form no sorting constraint)
+            graph.RemoveEdgeIf(e => (e.Source.Name != "memorycomponent" && e.Source.Name != "relaycomponent") && (e.Target.Name == "memorycomponent" || e.Target.Name == "relaycomponent"));
+            return graph;
+        }
+
+        public static bool VisitDownstream(Vertex vertex, Vertex[] sortedVertices, ref int head, ref int tail, AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, Dictionary<int, Mark> marks)
         {
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
             {
-                switch (marks[vertex.Id])
+                if (marks[vertex.Id] == Mark.Permanent)
                 {
-                    case Mark.Permanent:
-                        // End of branch
-                        return true;
-                    case Mark.Temporary:
-                        // Graph is not Acyclic
-                        return false;
-                    case Mark.Unmarked:
-                        break;
-                    default:
-                        //Assign temporary mark
-                        marks[vertex.Id] = Mark.Temporary;
-                        break;
+                    // End of branch
+                    return true;
                 }
+                if (marks[vertex.Id] == Mark.Temporary)
+                {
+                    // Graph is not Acyclic
+                    return false;
+                }
+
+                //Assign temporary mark
+                marks[vertex.Id] = Mark.Temporary;
             }
             else
             {
@@ -123,62 +126,59 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
             {
-                if (!VisitDownstream(nextVertex, sortedVertices, ref head, marks))
-                {
-                    // Graph is not acyclic
-                    return false;
-                }
+                VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks);
             }
 
             // Assign permanent mark
             marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            sortedVertices[head--] = vertex;
+            if(vertex.Name == "memorycomponent" || vertex.Name == "relaycomponent")
+            {
+                // Update memory components in reverse order
+                sortedVertices[tail++] = vertex;
+            }
+            else
+            {
+                sortedVertices[head--] = vertex;
+            }
 
             return true;
         }
 
-        public static void SolveUpdateOrder(
-            this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph)
+        public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph, out Vertex[] sortedVertices)
         {
             // Create GUID list for sorted vertices
-            Vertex[] sortedVertices = new Vertex[componentGraph.VertexCount];
-            int head = componentGraph.VertexCount - 1;
+            sortedVertices = new Vertex[componentGraph.VertexCount];
+            int head = componentGraph.VertexCount-1;
+            int tail = 0;
 
             // Create Dictionary to allow marking of vertices
             Dictionary<int, Mark> marks = new Dictionary<int, Mark>();
 
-            // Create Dictionary to find Vertices using GUIDs
-            Dictionary<int, Vertex> vertices =
-                componentGraph.Vertices.ToDictionary(vertex => vertex.Id);
+            // Remove loops containing memory from graph
+            componentGraph.PreprocessGraph();
 
             // Visit first unmarked Vertex
-            Vertex first =
-                componentGraph.Vertices.FirstOrDefault(vertex =>
-                                                           !marks
-                                                               .ContainsKey(vertex.Id));
-            while (!(first is null))
+            Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
+            while (!(first is null)) 
             {
-                if (!VisitDownstream(first, sortedVertices, ref head, marks))
-                {
-                    return;
-                }
-
-                first = componentGraph.Vertices.FirstOrDefault(vertex =>
-                    !marks.ContainsKey(vertex.Id));
+                VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks);
+                first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 
             // Create sorted list of IDs
             IEnumerable<int> idPool = componentGraph.Vertices.Select(v => v.Id);
-            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(id => id);
+            IOrderedEnumerable<int> sortedIds = idPool.OrderBy(i => i);
 
             // Apply list to graph
             int i = 0;
             foreach (int id in sortedIds)
             {
-                vertices[sortedVertices[i++].Id].Id = id;
+                sortedVertices[i++].Id = id;
             }
+
+            return componentGraph;
         }
     }
 }
