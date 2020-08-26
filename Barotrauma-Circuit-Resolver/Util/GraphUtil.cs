@@ -19,41 +19,47 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         private static bool FilterPower(XElement elt)
         {
-            return !PowerConnections.Contains(elt.Attribute("name").Value);
+            return !PowerConnections.Contains(elt.Attribute("name")?.Value);
         }
 
         public static IEnumerable<Vertex> GetComponents(this XDocument submarine)
         {
-            return submarine.Root.Elements()
-                                 .Where(e => e.Descendants("input")
-                                    .Union(e.Descendants("output"))
-                                    .Where(FilterPower)
-                                    .Elements("link").Any())
-                                 .Select(e => new Vertex(int.Parse(e.Attribute("ID").Value), e.Attribute("identifier").Value));
+            return submarine.Root?.Elements()
+                            .Where(e => e.Descendants("input")
+                                         .Union(e.Descendants("output"))
+                                         .Where(FilterPower)
+                                         .Elements("link")
+                                         .Any())
+                            .Select(e => new Vertex(int.Parse(e.Attribute("ID")?.Value!), e.Attribute("identifier")?.Value));
         }
 
         public static IEnumerable<Edge<Vertex>> GetEdges(this XDocument submarine, AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
-            return graph.Vertices.Select(s => submarine.GetNextIDs(s).Select(i => new Edge<Vertex>(s, graph.Vertices.Where(v => v.Id == i).First())))
-                                 .SelectMany(e => e).Distinct();
+            return graph.Vertices.Select(s => submarine.GetNextIDs(s)
+                                                       .Select(i =>
+                                                           new Edge<Vertex>(s,
+                                                               graph
+                                                                   .Vertices
+                                                                   .First(v => v.Id == i))))
+                        .SelectMany(e => e)
+                        .Distinct();
         }
 
         public static IEnumerable<int> GetNextIDs(this XDocument submarine, Vertex vertex)
         {
-            return submarine.GetNextIDs(submarine.Root.Elements()
-                .Where(e => e.Attribute("ID").Value == vertex.Id.ToString())
-                .First());
+            return submarine.GetNextIDs(submarine.Root?.Elements()
+                                                 .First(e => e.Attribute("ID")?.Value == vertex.Id.ToString()));
         }
 
         public static IEnumerable<int> GetNextIDs(this XDocument submarine, XElement element)
         {
-            return submarine.Root.Elements()
+            return submarine.Root?.Elements()
                 .Where(e => element.Descendants("output").Where(FilterPower).Elements("link")
-                    .Select(e => e.Attribute("w").Value)
+                    .Select(e2 => e2.Attribute("w")?.Value)
                     .Intersect(e.Descendants("input").Elements("link")
-                        .Select(i => i.Attribute("w").Value))
+                        .Select(i => i.Attribute("w")?.Value))
                     .Any())
-                .Select(e => int.Parse(e.Attribute("ID").Value));
+                .Select(e => int.Parse(e.Attribute("ID")?.Value!));
         }
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> CreateComponentGraph(XDocument submarine)
