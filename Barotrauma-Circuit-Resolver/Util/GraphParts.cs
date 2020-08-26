@@ -86,7 +86,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public override bool Equals(object obj)
         {
             return obj is Edge<TVertex> edge &&
-                   EqualityComparer<TVertex>.Default.Equals(source, edge.source) &&
+                   EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
                    EqualityComparer<TVertex>.Default.Equals(Source, edge.Source) &&
                    EqualityComparer<TVertex>.Default.Equals(Target, edge.Target);
         }
