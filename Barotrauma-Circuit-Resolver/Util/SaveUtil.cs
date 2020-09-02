@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -63,8 +64,8 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             const string xpath = "//Item/@ID|//link/@w";
 
-            IEnumerable<(int First, int Second)> ids = graph.Vertices.Select(v => v.Id)
-                .Zip(sortedVertices.Select(v => v.Id));
+            IEnumerable<(int First, int Second)> ids = sortedVertices.Select(v => v.Id)
+                .Zip(graph.Vertices.Select(v => v.Id));
             IEnumerable<Triplet<int, string, int>> idChangeTriplet =
                 ids.Select(e => new Triplet<int, string, int>(e.First,
                                sortedVertices.First(v => v.Id == e.First)
