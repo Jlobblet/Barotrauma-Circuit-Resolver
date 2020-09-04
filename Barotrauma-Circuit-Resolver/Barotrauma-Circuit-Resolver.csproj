@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Barotrauma_Circuit_Resolver</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>circ_resolver_icon_pack.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
