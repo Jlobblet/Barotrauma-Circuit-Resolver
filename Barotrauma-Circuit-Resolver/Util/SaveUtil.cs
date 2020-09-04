@@ -14,6 +14,10 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class SaveUtil
     {
+
+        public delegate void ProgressUpdate(float value, string label);
+        public static event ProgressUpdate OnProgressUpdate;
+
         public static XDocument LoadSubmarine(string filepath)
         {
             using FileStream fileSteam = new FileStream(filepath, FileMode.Open);
@@ -72,8 +76,11 @@ namespace Barotrauma_Circuit_Resolver.Util
                                              .GetStringHashCode(),
                                e.Second));
 
-            foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
+            IEnumerable<object> evaluatedPath = (IEnumerable<object>)submarine.XPathEvaluate(xpath);
+            (int, int) progress = (0, evaluatedPath.Count());
+            foreach (XObject xObject in evaluatedPath)
             {
+                OnProgressUpdate?.Invoke(.5f*progress.Item1++/progress.Item2, "Updating IDs in submarine XML...");
                 if (!(xObject is XAttribute attribute))
                 {
                     continue;
@@ -86,8 +93,10 @@ namespace Barotrauma_Circuit_Resolver.Util
                 }
             }
 
-            foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
+            progress.Item1 = 0;
+            foreach (XObject xObject in evaluatedPath)
             {
+                OnProgressUpdate?.Invoke(.5f+.5f*progress.Item1++ / progress.Item2, "Updating IDs in submarine XML...");
                 if (!(xObject is XAttribute attribute))
                 {
                     continue;

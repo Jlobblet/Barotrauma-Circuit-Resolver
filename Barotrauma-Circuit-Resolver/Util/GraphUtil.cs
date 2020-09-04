@@ -7,6 +7,9 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class GraphUtil
     {
+        public delegate void ProgressUpdate(float value, string label);
+        public static event ProgressUpdate OnProgressUpdate;
+
         public enum Mark
         {
             Unmarked,
@@ -156,7 +159,10 @@ namespace Barotrauma_Circuit_Resolver.Util
                 sortedVertices[head--] = vertex;
             }
 
+            OnProgressUpdate?.Invoke((componentGraph.VertexCount - head + tail)/componentGraph.VertexCount, "Solving Update Order...");
+
             return true;
+
         }
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(
@@ -165,6 +171,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             // Remove loops containing memory from graph
             componentGraph.PreprocessGraph();
+
             // Create Vertex list for sorted vertices
             sortedVertices = new Vertex[componentGraph.VertexCount];
             int head = componentGraph.VertexCount - 1;
@@ -193,8 +200,10 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
         {
+            OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
 
+            OnProgressUpdate?.Invoke(0, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
