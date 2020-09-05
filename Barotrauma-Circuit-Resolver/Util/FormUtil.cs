@@ -8,7 +8,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
-    internal static class FormUtils
+    internal static class FormUtil
     {
         public static string ShowFolderBrowserDialog()
         {

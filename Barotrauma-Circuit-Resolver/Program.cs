@@ -1,11 +1,11 @@
 using System;
-using System.IO;
 using System.Windows.Forms;
-using System.Xml;
+#if DEBUG
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
-using QuickGraph;
-using QuickGraph.Serialization;
+using BaroLib;
+#endif
+
 
 namespace Barotrauma_Circuit_Resolver
 {
@@ -20,8 +20,9 @@ namespace Barotrauma_Circuit_Resolver
 #if DEBUG
             if (args.Length > 1)
             {
-                var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(args[0]);
-                resolvedSubmarine.SaveSubmarine(args[1]);
+                (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
+                    GraphUtil.ResolveCircuit(args[0]);
+                resolvedSubmarine.SaveSub(args[1]);
                 if (args.Length > 2)
                 {
                     graph.SaveGraphML(args[2]);

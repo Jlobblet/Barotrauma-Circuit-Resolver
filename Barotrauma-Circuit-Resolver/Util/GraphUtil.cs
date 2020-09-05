@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using QuickGraph;
+using BaroLib;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -193,7 +194,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
         {
-            XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
+            XDocument submarine = IoUtil.LoadSub(inputSub);
 
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();

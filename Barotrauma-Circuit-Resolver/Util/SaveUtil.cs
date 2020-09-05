@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
@@ -14,31 +12,6 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class SaveUtil
     {
-        public static XDocument LoadSubmarine(string filepath)
-        {
-            using FileStream fileSteam = new FileStream(filepath, FileMode.Open);
-            using GZipStream gZipStream = new GZipStream(fileSteam, CompressionMode.Decompress);
-            return XDocument.Load(gZipStream);
-        }
-
-        public static void SaveSubmarine(this XDocument sub, string fileName)
-        {
-            string temp = Path.GetTempFileName();
-            File.WriteAllText(temp, sub.ToString());
-            byte[] b;
-            using (FileStream fs = new FileStream(temp, FileMode.Open))
-            {
-                b = new byte[fs.Length];
-                fs.Read(b, 0, (int)fs.Length);
-            }
-
-            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
-            using (GZipStream gz = new GZipStream(fs, CompressionMode.Compress, false))
-            {
-                gz.Write(b, 0, b.Length);
-            }
-        }
-        
         public static void SaveGraphML(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, string filepath)
         {
             if (File.Exists(filepath))
