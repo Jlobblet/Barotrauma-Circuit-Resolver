@@ -196,7 +196,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             XDocument submarine = IoUtil.LoadSub(inputSub);
 
-            AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
             graph.SolveUpdateOrder(out Vertex[] sortedVertices);

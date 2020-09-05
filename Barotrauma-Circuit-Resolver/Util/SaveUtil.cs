@@ -20,14 +20,13 @@ namespace Barotrauma_Circuit_Resolver.Util
             }
 
             static string VertexIdentity(Vertex v) => v.ToString();
-            static string EdgeIdentifier(Util.Edge<Vertex> e) => e.ToString();
+            static string EdgeIdentifier(Edge<Vertex> e) => e.ToString();
 
-            using FileStream fs = new FileStream(filepath, FileMode.OpenOrCreate);
-            using XmlWriter xw = XmlWriter.Create(fs);
+            using var fs = new FileStream(filepath, FileMode.OpenOrCreate);
+            using var xw = XmlWriter.Create(fs);
             graph.SerializeToGraphML(xw, VertexIdentity,
-                (EdgeIdentity<Vertex, Edge<Vertex>>)
-                EdgeIdentifier);
-
+                                     (EdgeIdentity<Vertex, Edge<Vertex>>)
+                                     EdgeIdentifier);
         }
 
         public static void UpdateSubmarineIDs(this XDocument submarine,
@@ -37,13 +36,9 @@ namespace Barotrauma_Circuit_Resolver.Util
         {
             const string xpath = "//Item/@ID|//link/@w";
 
-            IEnumerable<(int First, int Second)> ids = sortedVertices.Select(v => v.Id)
-                .Zip(graph.Vertices.Select(v => v.Id));
-            IEnumerable<Triplet<int, string, int>> idChangeTriplet =
-                ids.Select(e => new Triplet<int, string, int>(e.First,
-                               sortedVertices.First(v => v.Id == e.First)
-                                             .GetStringHashCode(),
-                               e.Second));
+            Dictionary<int, int> ids = sortedVertices.Select(v => v.Id)
+                                                     .Zip(graph.Vertices.Select(v => v.Id))
+                                                     .ToDictionary(k => k.First, v => v.Second);
 
             foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
             {
@@ -53,24 +48,9 @@ namespace Barotrauma_Circuit_Resolver.Util
                 }
 
                 int id = int.Parse(attribute.Value);
-                if (idChangeTriplet.Any(t => t.First == id))
+                if (ids.Any(t => t.Key == id))
                 {
-                    attribute.Value = idChangeTriplet.First(t => t.First == id).Second;
-                }
-            }
-
-            foreach (XObject xObject in (IEnumerable)submarine.XPathEvaluate(xpath))
-            {
-                if (!(xObject is XAttribute attribute))
-                {
-                    continue;
-                }
-
-                string hash = attribute.Value;
-                if (idChangeTriplet.Any(t => t.Second == hash))
-                {
-                    attribute.Value = idChangeTriplet.First(t => t.Second == hash).Third
-                                                     .ToString();
+                    attribute.Value = ids.First(t => t.Value == id).Value.ToString();
                 }
             }
         }
