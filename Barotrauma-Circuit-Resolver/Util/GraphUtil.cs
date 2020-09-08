@@ -202,7 +202,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
         {
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
-            XDocument submarine = SaveUtil.LoadSubmarine(inputSub);
+            XDocument submarine = IoUtil.LoadSub(inputSub);
 
             OnProgressUpdate?.Invoke(0, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =

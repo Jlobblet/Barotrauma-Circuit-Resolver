@@ -65,7 +65,7 @@ namespace Barotrauma_Circuit_Resolver
             var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
             if (ResolveBackgroundWorker.CancellationPending) { return; } // Need more cancellation checks (preferably within UpdateSubmarineIDs)
 
-            resolvedSubmarine.SaveSubmarine(outputFilepath);
+            resolvedSubmarine.SaveSub(outputFilepath);
             graph.SaveGraphML(graphFilepath); 
         }
 

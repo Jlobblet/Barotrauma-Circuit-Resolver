@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -12,6 +13,9 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public static class SaveUtil
     {
+        public delegate void ProgressUpdate(float value, string label);
+        public static event ProgressUpdate OnProgressUpdate;
+
         public static void SaveGraphML(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, string filepath)
         {
             if (File.Exists(filepath))
@@ -53,7 +57,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                 int id = int.Parse(attribute.Value);
                 if (ids.Any(t => t.Key == id))
                 {
-                    attribute.Value = ids.First(t => t.Value == id).Value.ToString();
+                    attribute.Value = ids.First(t => t.Key == id).Value.ToString();
                 }
             }
         }
