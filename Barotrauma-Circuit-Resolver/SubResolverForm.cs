@@ -63,7 +63,7 @@ namespace Barotrauma_Circuit_Resolver
                 Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
 
             var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
-            if (ResolveBackgroundWorker.CancellationPending) { return; } // Need more cancellation checks (preferably within UpdateSubmarineIDs)
+            if (ResolveBackgroundWorker.CancellationPending) { return; }
 
             resolvedSubmarine.SaveSub(outputFilepath);
             graph.SaveGraphML(graphFilepath); 

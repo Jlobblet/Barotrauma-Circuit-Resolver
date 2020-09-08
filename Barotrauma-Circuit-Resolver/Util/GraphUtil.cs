@@ -160,7 +160,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                 sortedVertices[head--] = vertex;
             }
 
-            OnProgressUpdate?.Invoke((componentGraph.VertexCount - head + tail)/componentGraph.VertexCount, "Solving Update Order...");
+            OnProgressUpdate?.Invoke(0.5f+.25f*(componentGraph.VertexCount - head + tail)/componentGraph.VertexCount, "Solving Update Order...");
 
             return true;
 
@@ -204,7 +204,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = IoUtil.LoadSub(inputSub);
 
-            OnProgressUpdate?.Invoke(0, "Extracting Component Graph...");
+            OnProgressUpdate?.Invoke(0.25f, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
