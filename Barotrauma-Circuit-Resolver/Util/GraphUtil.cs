@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using QuickGraph;
+using BaroLib;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {

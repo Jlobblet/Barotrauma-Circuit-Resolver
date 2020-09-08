@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
+using BaroLib;
 
 namespace Barotrauma_Circuit_Resolver
 {
@@ -31,11 +32,11 @@ namespace Barotrauma_Circuit_Resolver
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            string result = FormUtils.ShowFileBrowserDialog();
+            string result = FormUtil.ShowFileBrowserDialog();
             if (result == "") return;
             FilepathTextBox.Text = result;
-            XDocument sub = SaveUtil.LoadSubmarine(result);
-            pictureBox1.Image = FormUtils.GetImageFromString(sub.Root?.Attribute("previewimage")?.Value);
+            XDocument sub = IoUtil.LoadSub(result);
+            pictureBox1.Image = FormUtil.GetImageFromString(sub.Root?.Attribute("previewimage")?.Value);
         }
 
         private void GoButton_Click(object sender, EventArgs e)
