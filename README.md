@@ -1,5 +1,5 @@
 # Barotrauma-Circuit-Resolver
-In Barotrauma, components are updated in the order of their IDs. Each component is updated only once during each frame. This can lead to delays in the signal propagation or even break circuit operation entirely. 
+In Barotrauma, components are updated in the order of their IDs. Each component is updated only once during each frame. This can lead to delays in the signal propagation or even break circuit operation entirely, as most components calculate and send their output only upon being updated. 
 
 This circuit resolver removes these delays by redistributing the IDs over components such that components are only updated after the components that come before them have been updated. This is done using topological sorting.
 
