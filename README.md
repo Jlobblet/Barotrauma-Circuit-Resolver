@@ -14,7 +14,7 @@ Either build from source, or [download the compressed executable here](https://g
 ## Usage
 Run `Barotrauma-Circuit-Resolver.exe`
 
-# In depth explanation
+## In depth explanation
 To illustrate the problem, consider this simple chain of components where the IDs are in the reverse order:
 
 ![](example_rev_order.png)
@@ -29,7 +29,7 @@ The circuit resolver will sort the IDs to instead be in the order of signal prop
 
 Now component 1 will calculate its output first. This means that once component 2 is updated in the same frame it will already have the output of component 1. There will then no longer be a delay.
 
-# Special cases
+## Special cases
 One special case that the program does consider is the update order of storage elements such as memory components and relays (which can be considered 1 bit storage devices. Also note that opening a relay or sending signals through it does not require an update. On an update the relay only sends out its state). These components are updated in reverse order. This makes the memory components behave as 1 frame delays and also allows for the construction of useful circuits such as shift registers (which can then be implemented as a simple series chain of mems).
 
 There are a few special cases that currently can not be solved with this topological sorting within a decent timeframe. 
