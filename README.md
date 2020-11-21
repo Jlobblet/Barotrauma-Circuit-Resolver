@@ -17,15 +17,15 @@ Run `Barotrauma-Circuit-Resolver.exe`
 ## In depth explanation
 To illustrate the problem, consider this simple chain of components where the IDs are in the reverse order:
 
-![](example_rev_order.png)
+![component chain in reverse order](example_rev_order.png)
 
 When component 1 and 2 are first updated, they will still have 0 at its input. In the first frame, only component 3 will update its output. It is only in the frame 1 that component 2 will process the new output of component 3, and only in frame 2 that component 1 will in turn process the new output of component 2. 
 
-In circuits with longer chains of components, this can cause considerable delays which may change the order at which signals arrive. This can lead to incorrect results.
+In circuits with longer chains of components, this can cause considerable delays which may change the order and time at which signals arrive. This can lead to incorrect results.
 
 The circuit resolver will sort the IDs to instead be in the order of signal propagation: 
 
-![](example_fwd_order.png)
+![component chain in forwards order](example_fwd_order.png)
 
 Now component 1 will calculate its output first. This means that once component 2 is updated in the same frame it will already have the output of component 1. There will then no longer be a delay.
 
