@@ -7,9 +7,8 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public class Vertex
     {
-        public Vertex(int id)
+        public Vertex(int id) : this(id, id.ToString())
         {
-            new Vertex(id, id.ToString());
         }
 
         public Vertex(int id, string name)
