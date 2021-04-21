@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using Barotrauma_Circuit_Resolver.Util;
 using BaroLib;
+using Barotrauma_Circuit_Resolver.Util;
 
 namespace Barotrauma_Circuit_Resolver
 {
@@ -16,7 +16,7 @@ namespace Barotrauma_Circuit_Resolver
         public SubResolverForm()
         {
             InitializeComponent();
-            this.FormClosing += SubResolverForm_FormClosing;
+            FormClosing += SubResolverForm_FormClosing;
             NewSubCheckBox.Checked = Settings.Default.NewSub;
 
             // Subscribe to GraphUtil progress event
@@ -47,26 +47,30 @@ namespace Barotrauma_Circuit_Resolver
 
         private void OnResolveProgressUpdate(float value, string label)
         {
-            Invoke((Action)delegate
-            {
-                progressBar1.Value = (int) Math.Clamp(value * 100, 0, 100);
-                label1.Text = label;
-            });
+            Invoke((Action) delegate
+                            {
+                                progressBar1.Value = (int) Math.Clamp(value * 100, 0, 100);
+                                label1.Text = label;
+                            });
         }
 
         private void ResolveBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string inputFilepath = FilepathTextBox.Text;
-            string outputFilepath = NewSubCheckBox.Checked ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + "_resolved.sub") : inputFilepath;
-                string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
+            string outputFilepath = NewSubCheckBox.Checked
+                                        ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
+                                                       Path.GetFileNameWithoutExtension(inputFilepath) +
+                                                       "_resolved.sub")
+                                        : inputFilepath;
+            string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
+                                                Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
 
-            var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
-            if (ResolveBackgroundWorker.CancellationPending) { return; }
+            (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
+                GraphUtil.ResolveCircuit(FilepathTextBox.Text);
+            if (ResolveBackgroundWorker.CancellationPending) return;
 
             resolvedSubmarine.SaveSub(outputFilepath);
-            graph.SaveGraphML(graphFilepath); 
+            graph.SaveGraphML(graphFilepath);
         }
 
         private void ResolveBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -74,7 +78,7 @@ namespace Barotrauma_Circuit_Resolver
             progressBar1.Value = 0;
             label1.Text = "Done.";
             GoButton.Enabled = true;
-            if (closePending) this.Close();
+            if (closePending) Close();
             closePending = false;
         }
 
@@ -91,19 +95,16 @@ namespace Barotrauma_Circuit_Resolver
                 closePending = true;
                 ResolveBackgroundWorker.CancelAsync();
                 e.Cancel = true;
-                this.Enabled = false;
-                return;
+                Enabled = false;
             }
         }
 
         private void SubResolverForm_Load(object sender, EventArgs e)
         {
-
         }
 
         private void progressBar1_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

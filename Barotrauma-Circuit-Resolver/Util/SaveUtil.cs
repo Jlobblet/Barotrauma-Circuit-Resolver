@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -14,17 +12,22 @@ namespace Barotrauma_Circuit_Resolver.Util
     public static class SaveUtil
     {
         public delegate void ProgressUpdate(float value, string label);
+
         public static event ProgressUpdate OnProgressUpdate;
 
         public static void SaveGraphML(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, string filepath)
         {
-            if (File.Exists(filepath))
+            if (File.Exists(filepath)) File.Delete(filepath);
+
+            static string VertexIdentity(Vertex v)
             {
-                File.Delete(filepath);
+                return v.ToString();
             }
 
-            static string VertexIdentity(Vertex v) => v.ToString();
-            static string EdgeIdentifier(Edge<Vertex> e) => e.ToString();
+            static string EdgeIdentifier(Edge<Vertex> e)
+            {
+                return e.ToString();
+            }
 
             using var fs = new FileStream(filepath, FileMode.OpenOrCreate);
             using var xw = XmlWriter.Create(fs);
@@ -44,21 +47,16 @@ namespace Barotrauma_Circuit_Resolver.Util
                                                      .Zip(graph.Vertices.Select(v => v.Id))
                                                      .ToDictionary(k => k.First, v => v.Second);
 
-            IEnumerable<object> evaluatedPath = (IEnumerable<object>)submarine.XPathEvaluate(xpath);
+            var evaluatedPath = (IEnumerable<object>) submarine.XPathEvaluate(xpath);
             (int, int) progress = (0, evaluatedPath.Count());
             foreach (XObject xObject in evaluatedPath)
             {
-                OnProgressUpdate?.Invoke(0.75f + 0.25f*progress.Item1++/progress.Item2, "Updating IDs in submarine XML...");
-                if (!(xObject is XAttribute attribute))
-                {
-                    continue;
-                }
+                OnProgressUpdate?.Invoke(0.75f + 0.25f * progress.Item1++ / progress.Item2,
+                                         "Updating IDs in submarine XML...");
+                if (!(xObject is XAttribute attribute)) continue;
 
                 int id = int.Parse(attribute.Value);
-                if (ids.Any(t => t.Key == id))
-                {
-                    attribute.Value = ids.First(t => t.Key == id).Value.ToString();
-                }
+                if (ids.Any(t => t.Key == id)) attribute.Value = ids.First(t => t.Key == id).Value.ToString();
             }
         }
     }

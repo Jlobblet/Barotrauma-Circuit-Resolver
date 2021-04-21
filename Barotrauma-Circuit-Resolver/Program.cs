@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
 using BaroLib;
+
 #endif
 
 
@@ -23,10 +24,7 @@ namespace Barotrauma_Circuit_Resolver
                 (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
                     GraphUtil.ResolveCircuit(args[0]);
                 resolvedSubmarine.SaveSub(args[1]);
-                if (args.Length > 2)
-                {
-                    graph.SaveGraphML(args[2]);
-                }
+                if (args.Length > 2) graph.SaveGraphML(args[2]);
             }
 #endif
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
