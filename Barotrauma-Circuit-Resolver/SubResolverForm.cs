@@ -59,11 +59,10 @@ namespace Barotrauma_Circuit_Resolver
             string inputFilepath = FilepathTextBox.Text;
             string outputFilepath = NewSubCheckBox.Checked
                                         ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                                                       Path.GetFileNameWithoutExtension(inputFilepath) +
-                                                       "_resolved.sub")
+                                                       $"{Path.GetFileNameWithoutExtension(inputFilepath)}_resolved{Path.GetExtension(inputFilepath)}")
                                         : inputFilepath;
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                                                Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
+                                                $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
             (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
                 GraphUtil.ResolveCircuit(FilepathTextBox.Text);
