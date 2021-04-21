@@ -102,9 +102,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
             graph.RemoveEdgeIf(e => e.Source.Name != "memorycomponent" &&
-                                    e.Source.Name != "relaycomponent" &&
-                                    (e.Target.Name == "memorycomponent" ||
-                                     e.Target.Name == "relaycomponent"));
+                                    e.Target.Name == "memorycomponent");
         }
 
         public static bool VisitDownstream(Vertex vertex,
@@ -150,7 +148,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            if(vertex.Name == "memorycomponent" || vertex.Name == "relaycomponent")
+            if(vertex.Name == "memorycomponent")
             {
                 // Update memory components in reverse order
                 sortedVertices[tail++] = vertex;
