@@ -106,13 +106,10 @@ namespace Barotrauma_Circuit_Resolver.Util
             this AdjacencyGraph<Vertex, Edge<Vertex>> graph, bool invertMemory, bool retainParallel)
         {
             if (invertMemory)
-            {
                 InvertMemory(graph);
-            }
+
             if (retainParallel)
-            {
                 ConstrainParallel(graph);
-            }
         }
 
         /// <summary>
@@ -152,9 +149,7 @@ namespace Barotrauma_Circuit_Resolver.Util
 
                     // Create connections between the outgoing edges
                     for(int i=0; i<sortedTargets.Count()-1; i++)
-                    {
                         constraints.Add(new Edge<Vertex>(sortedTargets[i], sortedTargets[i + 1]));
-                    }
                 }
             }
 
@@ -174,20 +169,19 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             for (int i = 0; i < vertices.Count() - 1; i++)
             {
-                if (!unconnectedVertices.Contains(vertices[i])) { continue; } // Vertex already determined interconnected
+                if (!unconnectedVertices.Contains(vertices[i])) continue;  // Vertex already determined interconnected
 
                 for (int j = 0; j < vertices.Count() - 1; j++) // j starts as i+1 as any previous nodes need not be reconsidered
                 {
-                    if (j == i) { continue; }
+                    if (j == i) continue; 
 
                     if (graph.ContainsEdge(vertices[i], vertices[j]) ||
                         graph.ContainsEdge(vertices[j], vertices[i]))
                     {
                         unconnectedVertices.Remove(vertices[i]);
+
                         if (unconnectedVertices.Contains(vertices[i])) 
-                        { 
                             unconnectedVertices.Remove(vertices[i]); // Might have been removed previously
-                        }
                     }
                 }
             }
@@ -201,7 +195,8 @@ namespace Barotrauma_Circuit_Resolver.Util
                                            ref int tail,
                                            AdjacencyGraph<Vertex, Edge<Vertex>>
                                                componentGraph,
-                                           Dictionary<int, Mark> marks)
+                                           Dictionary<int, Mark> marks,
+                                           bool invertMemory)
         {
             // Assign the new IDs to the vertices
             if (marks.ContainsKey(vertex.Id))
@@ -226,14 +221,13 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             // Visit next components
             foreach (Vertex nextVertex in vertex.OutgoingEdges.Select(e => e.Target))
-                VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks);
+                VisitDownstream(nextVertex, sortedVertices, ref head, ref tail, componentGraph, marks, invertMemory);
 
             // Assign permanent mark
             marks[vertex.Id] = Mark.Permanent;
 
             // Prepend n to sortedGuids
-            if(vertex.Name == "memorycomponent")
-            {
+            if(invertMemory && vertex.Name == "memorycomponent")
                 // Update memory components in reverse order
                 sortedVertices[tail++] = vertex;
             else
@@ -264,7 +258,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             Vertex first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             while (!(first is null))
             {
-                VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks);
+                VisitDownstream(first, sortedVertices, ref head, ref tail, componentGraph, marks, invertMemory);
                 first = componentGraph.Vertices.FirstOrDefault(vertex => !marks.ContainsKey(vertex.Id));
             }
 
@@ -277,25 +271,27 @@ namespace Barotrauma_Circuit_Resolver.Util
             return componentGraph;
         }
 
-        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(XDocument inputDoc)
+        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(
+            XDocument inputDoc, bool invertMemory, bool retainParallel)
         {
-            OnProgressUpdate?.Invoke(0.25f, "Extracting Component Graph...");
+            OnProgressUpdate?.Invoke(0, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 inputDoc.CreateComponentGraph();
 
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel);
             inputDoc.UpdateSubmarineIDs(graph, sortedVertices);
 
             return (inputDoc, graph);
             
         }
-        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub, bool invertMemory, bool retainParallel)
+        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(
+            string inputSub, bool invertMemory, bool retainParallel)
         {
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = IoUtil.LoadSub(inputSub);
 
             OnProgressUpdate?.Invoke(0.2f, "Extracting Component Graph...");
-            AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
             graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel);

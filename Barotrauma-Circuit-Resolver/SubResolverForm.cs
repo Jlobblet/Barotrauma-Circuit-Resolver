@@ -35,11 +35,17 @@ namespace Barotrauma_Circuit_Resolver
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            string result = FormUtil.ShowFileBrowserDialog();
-            if (result == "") return;
-            FilepathTextBox.Text = result;
-            XDocument sub = IoUtil.LoadSub(result);
-            pictureBox1.Image = FormUtil.GetImageFromString(sub.Root?.Attribute("previewimage")?.Value);
+            string inputFilepath = FormUtil.ShowFileBrowserDialog();
+            if(string.IsNullOrWhiteSpace(inputFilepath)) return;
+            FilepathTextBox.Text = inputFilepath;
+
+            bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
+            XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
+
+            if (isSubFile)
+                pictureBox1.Image = FormUtil.GetImageFromString(inputDocument.Root?.Attribute("previewimage")?.Value);
+            else
+                pictureBox1.Image = null; // Assemblies do not contain preview images
         }
 
         private void GoButton_Click(object sender, EventArgs e)
