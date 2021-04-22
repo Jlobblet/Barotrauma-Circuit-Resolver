@@ -57,15 +57,25 @@ namespace Barotrauma_Circuit_Resolver
         private void ResolveBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string inputFilepath = FilepathTextBox.Text;
+            if (string.IsNullOrWhiteSpace(inputFilepath))
+            {
+                ResolveBackgroundWorker.CancelAsync();
+                return;
+            }
+            
             string outputFilepath = NewSubCheckBox.Checked
                                         ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                        $"{Path.GetFileNameWithoutExtension(inputFilepath)}_resolved{Path.GetExtension(inputFilepath)}")
                                         : inputFilepath;
+            
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                 $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
+            bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
+            XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
+
             (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
-                GraphUtil.ResolveCircuit(FilepathTextBox.Text);
+                GraphUtil.ResolveCircuit(inputDocument);
             if (ResolveBackgroundWorker.CancellationPending) return;
 
             resolvedSubmarine.SaveSub(outputFilepath);

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using BaroLib;
+using FSharpx.Collections.Experimental;
 using QuickGraph;
 
 namespace Barotrauma_Circuit_Resolver.Util
@@ -193,19 +194,25 @@ namespace Barotrauma_Circuit_Resolver.Util
             return componentGraph;
         }
 
+        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(XDocument inputDoc)
+        {
+            OnProgressUpdate?.Invoke(0.25f, "Extracting Component Graph...");
+            AdjacencyGraph<Vertex, Edge<Vertex>> graph =
+                inputDoc.CreateComponentGraph();
+
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
+            inputDoc.UpdateSubmarineIDs(graph, sortedVertices);
+
+            return (inputDoc, graph);
+            
+        }
+
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
         {
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = IoUtil.LoadSub(inputSub);
 
-            OnProgressUpdate?.Invoke(0.25f, "Extracting Component Graph...");
-            AdjacencyGraph<Vertex, Edge<Vertex>> graph =
-                submarine.CreateComponentGraph();
-
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
-            submarine.UpdateSubmarineIDs(graph, sortedVertices);
-
-            return (submarine, graph);
+            return ResolveCircuit(submarine);
         }
     }
 }
