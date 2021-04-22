@@ -37,6 +37,7 @@
             this.NewSubCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.SaveGraphCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SettingGroupBox.SuspendLayout();
             this.SuspendLayout();
@@ -88,6 +89,7 @@
             // 
             this.SettingGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.SettingGroupBox.Controls.Add(this.SaveGraphCheckBox);
             this.SettingGroupBox.Controls.Add(this.NewSubCheckBox);
             this.SettingGroupBox.Location = new System.Drawing.Point(10, 213);
             this.SettingGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -130,6 +132,17 @@
             this.label1.Size = new System.Drawing.Size(0, 15);
             this.label1.TabIndex = 6;
             // 
+            // SaveGraphCheckBox
+            // 
+            this.SaveGraphCheckBox.Location = new System.Drawing.Point(5, 42);
+            this.SaveGraphCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SaveGraphCheckBox.Name = "SaveGraphCheckBox";
+            this.SaveGraphCheckBox.Size = new System.Drawing.Size(210, 18);
+            this.SaveGraphCheckBox.TabIndex = 0;
+            this.SaveGraphCheckBox.Text = "Save Graph";
+            this.SaveGraphCheckBox.UseVisualStyleBackColor = true;
+            this.SaveGraphCheckBox.CheckedChanged += new System.EventHandler(this.NewSubCheckBox_CheckedChanged);
+            // 
             // SubResolverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -164,6 +177,7 @@
         private System.Windows.Forms.CheckBox NewSubCheckBox;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox SaveGraphCheckBox;
     }
 }
 

@@ -34,5 +34,17 @@ namespace Barotrauma_Circuit_Resolver {
                 this["NewSub"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SaveGraph {
+            get {
+                return ((bool)(this["SaveGraph"]));
+            }
+            set {
+                this["SaveGraph"] = value;
+            }
+        }
     }
 }
