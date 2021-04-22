@@ -48,7 +48,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             (int, int) progress = (0, evaluatedPath.Count());
             foreach (XObject xObject in evaluatedPath)
             {
-                OnProgressUpdate?.Invoke(0.75f + 0.25f*progress.Item1++/progress.Item2, "Updating IDs in submarine XML...");
+                OnProgressUpdate?.Invoke(0.8f + 0.2f*progress.Item1++/progress.Item2, "Updating IDs in submarine XML...");
                 if (!(xObject is XAttribute attribute))
                 {
                     continue;

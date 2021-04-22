@@ -34,6 +34,8 @@
             this.GoButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SettingGroupBox = new System.Windows.Forms.GroupBox();
+            this.InvertMemoryCheckBox = new System.Windows.Forms.CheckBox();
+            this.RetainParallelCheckBox = new System.Windows.Forms.CheckBox();
             this.SaveGraphCheckBox = new System.Windows.Forms.CheckBox();
             this.NewSubCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -65,9 +67,9 @@
             // GoButton
             // 
             this.GoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.GoButton.Location = new System.Drawing.Point(299, 335);
+            this.GoButton.Location = new System.Drawing.Point(287, 332);
             this.GoButton.Name = "GoButton";
-            this.GoButton.Size = new System.Drawing.Size(165, 94);
+            this.GoButton.Size = new System.Drawing.Size(177, 122);
             this.GoButton.TabIndex = 2;
             this.GoButton.Text = "Go";
             this.GoButton.UseVisualStyleBackColor = true;
@@ -91,16 +93,41 @@
             // 
             this.SettingGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.SettingGroupBox.Controls.Add(this.InvertMemoryCheckBox);
+            this.SettingGroupBox.Controls.Add(this.RetainParallelCheckBox);
             this.SettingGroupBox.Controls.Add(this.SaveGraphCheckBox);
             this.SettingGroupBox.Controls.Add(this.NewSubCheckBox);
-            this.SettingGroupBox.Location = new System.Drawing.Point(10, 335);
+            this.SettingGroupBox.Location = new System.Drawing.Point(10, 332);
             this.SettingGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SettingGroupBox.Name = "SettingGroupBox";
             this.SettingGroupBox.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SettingGroupBox.Size = new System.Drawing.Size(271, 94);
+            this.SettingGroupBox.Size = new System.Drawing.Size(271, 122);
             this.SettingGroupBox.TabIndex = 4;
             this.SettingGroupBox.TabStop = false;
             this.SettingGroupBox.Text = "Settings";
+            this.SettingGroupBox.Enter += new System.EventHandler(this.SettingGroupBox_Enter);
+            // 
+            // InvertMemoryCheckBox
+            // 
+            this.InvertMemoryCheckBox.Location = new System.Drawing.Point(6, 64);
+            this.InvertMemoryCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.InvertMemoryCheckBox.Name = "InvertMemoryCheckBox";
+            this.InvertMemoryCheckBox.Size = new System.Drawing.Size(233, 18);
+            this.InvertMemoryCheckBox.TabIndex = 0;
+            this.InvertMemoryCheckBox.Text = "Invert order of storage components";
+            this.InvertMemoryCheckBox.UseVisualStyleBackColor = true;
+            this.InvertMemoryCheckBox.CheckedChanged += new System.EventHandler(this.NewSubCheckBox_CheckedChanged);
+            // 
+            // RetainParallelCheckBox
+            // 
+            this.RetainParallelCheckBox.Location = new System.Drawing.Point(6, 86);
+            this.RetainParallelCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.RetainParallelCheckBox.Name = "RetainParallelCheckBox";
+            this.RetainParallelCheckBox.Size = new System.Drawing.Size(233, 18);
+            this.RetainParallelCheckBox.TabIndex = 0;
+            this.RetainParallelCheckBox.Text = "Retain parallel component order";
+            this.RetainParallelCheckBox.UseVisualStyleBackColor = true;
+            this.RetainParallelCheckBox.CheckedChanged += new System.EventHandler(this.NewSubCheckBox_CheckedChanged);
             // 
             // SaveGraphCheckBox
             // 
@@ -140,7 +167,7 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.label1.Location = new System.Drawing.Point(13, 330);
+            this.label1.Location = new System.Drawing.Point(14, 308);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(0, 15);
             this.label1.TabIndex = 6;
@@ -149,7 +176,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(475, 436);
+            this.ClientSize = new System.Drawing.Size(475, 461);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.SettingGroupBox);
@@ -159,7 +186,7 @@
             this.Controls.Add(this.FilepathTextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(1920, 1080);
-            this.MinimumSize = new System.Drawing.Size(450, 215);
+            this.MinimumSize = new System.Drawing.Size(450, 240);
             this.Name = "SubResolverForm";
             this.Text = "Barotrauma Circuit Resolver";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -181,6 +208,8 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox SaveGraphCheckBox;
+        private System.Windows.Forms.CheckBox RetainParallelCheckBox;
+        private System.Windows.Forms.CheckBox InvertMemoryCheckBox;
     }
 }
 

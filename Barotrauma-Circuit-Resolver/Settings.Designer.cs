@@ -46,5 +46,29 @@ namespace Barotrauma_Circuit_Resolver {
                 this["SaveGraph"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RetainParallel {
+            get {
+                return ((bool)(this["RetainParallel"]));
+            }
+            set {
+                this["RetainParallel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InvertMemory {
+            get {
+                return ((bool)(this["InvertMemory"]));
+            }
+            set {
+                this["InvertMemory"] = value;
+            }
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace Barotrauma_Circuit_Resolver
             this.FormClosing += SubResolverForm_FormClosing;
             NewSubCheckBox.Checked = Settings.Default.NewSub;
             SaveGraphCheckBox.Checked = Settings.Default.SaveGraph;
+            InvertMemoryCheckBox.Checked = Settings.Default.InvertMemory;
+            RetainParallelCheckBox.Checked = Settings.Default.RetainParallel;
 
             // Subscribe to GraphUtil progress event
             GraphUtil.OnProgressUpdate += OnResolveProgressUpdate;
@@ -63,7 +65,7 @@ namespace Barotrauma_Circuit_Resolver
                 string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                 Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
 
-            var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text);
+            var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
             if (ResolveBackgroundWorker.CancellationPending) { return; }
 
             resolvedSubmarine.SaveSub(outputFilepath);
@@ -88,9 +90,19 @@ namespace Barotrauma_Circuit_Resolver
             Settings.Default.NewSub = NewSubCheckBox.Checked;
             Settings.Default.Save();
         }
-        private void SaveGraph_CheckedChanged(object sender, EventArgs e)
+        private void SaveGraphCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Settings.Default.SaveGraph = SaveGraphCheckBox.Checked;
+            Settings.Default.Save();
+        }
+        private void InvertMemoryCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.SaveGraph = InvertMemoryCheckBox.Checked;
+            Settings.Default.Save();
+        }
+        private void RetainParallelCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.SaveGraph = RetainParallelCheckBox.Checked;
             Settings.Default.Save();
         }
 
@@ -112,6 +124,11 @@ namespace Barotrauma_Circuit_Resolver
         }
 
         private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SettingGroupBox_Enter(object sender, EventArgs e)
         {
 
         }

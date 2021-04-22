@@ -3,6 +3,8 @@ using System.Linq;
 using System.Xml.Linq;
 using QuickGraph;
 using BaroLib;
+using System.Reflection.Metadata.Ecma335;
+using QuickGraph.Algorithms.TopologicalSort;
 
 namespace Barotrauma_Circuit_Resolver.Util
 {
@@ -93,16 +95,102 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
 
         /// <summary>
+        /// Preprocesses the graph to change constraints based on sort setting
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="invertMemory"></param>
+        /// <param name="retainParallel"></param>
+        public static void PreprocessGraph(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> graph, bool invertMemory, bool retainParallel)
+        {
+            if (invertMemory)
+            {
+                InvertMemory(graph);
+            }
+            if (retainParallel)
+            {
+                ConstrainParallel(graph);
+            }
+        }
+
+        /// <summary>
         /// Remove all links that go from logic components into data/state storage components.
         /// (data/storage will be assigned the lowest IDs to be updated first, so these links form no sorting constraint)
         /// </summary>
         /// <param name="graph"></param>
         /// <returns></returns>
-        public static void PreprocessGraph(
+        public static void InvertMemory(
             this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
         {
             graph.RemoveEdgeIf(e => e.Source.Name != "memorycomponent" &&
                                     e.Target.Name == "memorycomponent");
+        }
+
+        /// <summary>
+        /// Add connections between multiple connections after the same component to constrain the update-order sorting such
+        /// that the order between them remains the same after sorting. 
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static void ConstrainParallel(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        {
+            List<Edge<Vertex>> constraints = new List<Edge<Vertex>>();
+
+            // TO-DO: Add connections
+            foreach (Vertex source in graph.Vertices)
+            {
+                if(source.OutgoingEdges.Count() > 1)
+                {
+                    // Create list of outgoing edges sorted by ID
+                    List<Vertex> sortedTargets = source.OutgoingEdges.Select(e => e.Target).OrderBy(v => v.Id).ToList();
+
+                    // Remove any interconnected components as placing constraints on these components may cause conflicts
+                    sortedTargets = RemoveInterconnected(graph, sortedTargets);
+
+                    // Create connections between the outgoing edges
+                    for(int i=0; i<sortedTargets.Count()-1; i++)
+                    {
+                        constraints.Add(new Edge<Vertex>(sortedTargets[i], sortedTargets[i + 1]));
+                    }
+                }
+            }
+
+            // Add the constraints to the graph
+            graph.AddEdgeRange(constraints);
+        }
+
+        /// <summary>
+        /// Remove from a list of vertices any vertices that are directly connected
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        public static List<Vertex> RemoveInterconnected(this AdjacencyGraph<Vertex, Edge<Vertex>> graph, List<Vertex> vertices)
+        {
+            List<Vertex> unconnectedVertices = vertices;
+
+            for (int i = 0; i < vertices.Count() - 1; i++)
+            {
+                if (!unconnectedVertices.Contains(vertices[i])) { continue; } // Vertex already determined interconnected
+
+                for (int j = 0; j < vertices.Count() - 1; j++) // j starts as i+1 as any previous nodes need not be reconsidered
+                {
+                    if (j == i) { continue; }
+
+                    if (graph.ContainsEdge(vertices[i], vertices[j]) ||
+                        graph.ContainsEdge(vertices[j], vertices[i]))
+                    {
+                        unconnectedVertices.Remove(vertices[i]);
+                        if (unconnectedVertices.Contains(vertices[i])) 
+                        { 
+                            unconnectedVertices.Remove(vertices[i]); // Might have been removed previously
+                        }
+                    }
+                }
+            }
+
+            return unconnectedVertices;
         }
 
         public static bool VisitDownstream(Vertex vertex,
@@ -158,7 +246,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                 sortedVertices[head--] = vertex;
             }
 
-            OnProgressUpdate?.Invoke(0.5f+.25f*(componentGraph.VertexCount - head + tail)/componentGraph.VertexCount, "Solving Update Order...");
+            OnProgressUpdate?.Invoke(0.6f+.2f*(componentGraph.VertexCount - head + tail)/componentGraph.VertexCount, "Solving Update Order...");
 
             return true;
 
@@ -166,10 +254,11 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(
             this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph,
-            out Vertex[] sortedVertices)
+            out Vertex[] sortedVertices, bool invertMemory, bool retainParallel)
         {
+            OnProgressUpdate?.Invoke(0.4f, "Preprocessing graph...");
             // Remove loops containing memory from graph
-            componentGraph.PreprocessGraph();
+            componentGraph.PreprocessGraph(invertMemory, retainParallel);
 
             // Create Vertex list for sorted vertices
             sortedVertices = new Vertex[componentGraph.VertexCount];
@@ -197,16 +286,16 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             return componentGraph;
         }
-        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub)
+        public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(string inputSub, bool invertMemory, bool retainParallel)
         {
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = IoUtil.LoadSub(inputSub);
 
-            OnProgressUpdate?.Invoke(0.25f, "Extracting Component Graph...");
+            OnProgressUpdate?.Invoke(0.2f, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Util.Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices);
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel);
             submarine.UpdateSubmarineIDs(graph, sortedVertices);
 
             return (submarine, graph);
