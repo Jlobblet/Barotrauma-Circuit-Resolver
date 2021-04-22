@@ -68,6 +68,12 @@ namespace Barotrauma_Circuit_Resolver
             var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
             if (ResolveBackgroundWorker.CancellationPending) { return; }
 
+            // Update Submarine Name if a new file is made
+            if (NewSubCheckBox.Checked)
+            {
+                resolvedSubmarine.Root.Attribute("name").Value = resolvedSubmarine.Root.Attribute("name").Value + " resolved";
+            }
+
             resolvedSubmarine.SaveSub(outputFilepath);
 
             if (SaveGraphCheckBox.Checked)
