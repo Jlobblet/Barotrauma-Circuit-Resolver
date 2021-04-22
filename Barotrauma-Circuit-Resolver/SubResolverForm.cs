@@ -61,7 +61,7 @@ namespace Barotrauma_Circuit_Resolver
         {
             string inputFilepath = FilepathTextBox.Text;
             string outputFilepath = NewSubCheckBox.Checked ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + "_resolved.sub") : inputFilepath;
+                Path.GetFileNameWithoutExtension(inputFilepath) + " resolved.sub") : inputFilepath;
                 string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                 Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
 
