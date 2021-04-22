@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using Barotrauma_Circuit_Resolver.Util;
 using BaroLib;
+using Barotrauma_Circuit_Resolver.Util;
 
 namespace Barotrauma_Circuit_Resolver
 {
@@ -16,7 +16,7 @@ namespace Barotrauma_Circuit_Resolver
         public SubResolverForm()
         {
             InitializeComponent();
-            this.FormClosing += SubResolverForm_FormClosing;
+            FormClosing += SubResolverForm_FormClosing;
             NewSubCheckBox.Checked = Settings.Default.NewSub;
             SaveGraphCheckBox.Checked = Settings.Default.SaveGraph;
             InvertMemoryCheckBox.Checked = Settings.Default.InvertMemory;
@@ -50,22 +50,35 @@ namespace Barotrauma_Circuit_Resolver
 
         private void OnResolveProgressUpdate(float value, string label)
         {
-            Invoke((Action)delegate
-            {
-                progressBar1.Value = (int) Math.Clamp(value * 100, 0, 100);
-                label1.Text = label;
-            });
+            Invoke((Action) delegate
+                            {
+                                progressBar1.Value = (int) Math.Clamp(value * 100, 0, 100);
+                                label1.Text = label;
+                            });
         }
 
         private void ResolveBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string inputFilepath = FilepathTextBox.Text;
-            string outputFilepath = NewSubCheckBox.Checked ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + " resolved.sub") : inputFilepath;
-                string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                Path.GetFileNameWithoutExtension(inputFilepath) + ".graphml");
+            if (string.IsNullOrWhiteSpace(inputFilepath))
+            {
+                ResolveBackgroundWorker.CancelAsync();
+                return;
+            }
+            
+            string outputFilepath = NewSubCheckBox.Checked
+                                        ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
+                                                       $"{Path.GetFileNameWithoutExtension(inputFilepath)} resolved{Path.GetExtension(inputFilepath)}")
+                                        : inputFilepath;
+            
+            string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
+                                                $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
-            var (resolvedSubmarine, graph) = GraphUtil.ResolveCircuit(FilepathTextBox.Text, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
+            bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
+            XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
+
+            (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) = 
+                GraphUtil.ResolveCircuit(FilepathTextBox.Text, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
             if (ResolveBackgroundWorker.CancellationPending) { return; }
 
             // Update Submarine Name if a new file is made
@@ -87,7 +100,7 @@ namespace Barotrauma_Circuit_Resolver
             progressBar1.Value = 0;
             label1.Text = "Done.";
             GoButton.Enabled = true;
-            if (closePending) this.Close();
+            if (closePending) Close();
             closePending = false;
         }
 
@@ -119,19 +132,16 @@ namespace Barotrauma_Circuit_Resolver
                 closePending = true;
                 ResolveBackgroundWorker.CancelAsync();
                 e.Cancel = true;
-                this.Enabled = false;
-                return;
+                Enabled = false;
             }
         }
 
         private void SubResolverForm_Load(object sender, EventArgs e)
         {
-
         }
 
         private void progressBar1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void SettingGroupBox_Enter(object sender, EventArgs e)
