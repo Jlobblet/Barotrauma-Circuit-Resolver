@@ -34,10 +34,10 @@
             this.GoButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SettingGroupBox = new System.Windows.Forms.GroupBox();
+            this.SaveGraphCheckBox = new System.Windows.Forms.CheckBox();
             this.NewSubCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
-            this.SaveGraphCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SettingGroupBox.SuspendLayout();
             this.SuspendLayout();
@@ -82,6 +82,7 @@
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(403, 143);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 3;
             this.pictureBox1.TabStop = false;
             // 
@@ -99,6 +100,17 @@
             this.SettingGroupBox.TabIndex = 4;
             this.SettingGroupBox.TabStop = false;
             this.SettingGroupBox.Text = "Settings";
+            // 
+            // SaveGraphCheckBox
+            // 
+            this.SaveGraphCheckBox.Location = new System.Drawing.Point(5, 42);
+            this.SaveGraphCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.SaveGraphCheckBox.Name = "SaveGraphCheckBox";
+            this.SaveGraphCheckBox.Size = new System.Drawing.Size(210, 18);
+            this.SaveGraphCheckBox.TabIndex = 0;
+            this.SaveGraphCheckBox.Text = "Save Graph";
+            this.SaveGraphCheckBox.UseVisualStyleBackColor = true;
+            this.SaveGraphCheckBox.CheckedChanged += new System.EventHandler(this.NewSubCheckBox_CheckedChanged);
             // 
             // NewSubCheckBox
             // 
@@ -131,17 +143,6 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(0, 15);
             this.label1.TabIndex = 6;
-            // 
-            // SaveGraphCheckBox
-            // 
-            this.SaveGraphCheckBox.Location = new System.Drawing.Point(5, 42);
-            this.SaveGraphCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SaveGraphCheckBox.Name = "SaveGraphCheckBox";
-            this.SaveGraphCheckBox.Size = new System.Drawing.Size(210, 18);
-            this.SaveGraphCheckBox.TabIndex = 0;
-            this.SaveGraphCheckBox.Text = "Save Graph";
-            this.SaveGraphCheckBox.UseVisualStyleBackColor = true;
-            this.SaveGraphCheckBox.CheckedChanged += new System.EventHandler(this.NewSubCheckBox_CheckedChanged);
             // 
             // SubResolverForm
             // 
