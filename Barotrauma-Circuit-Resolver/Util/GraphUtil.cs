@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using BaroLib;
@@ -243,6 +244,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             out Vertex[] sortedVertices, bool invertMemory, bool retainParallel)
         {
             OnProgressUpdate?.Invoke(0.4f, "Preprocessing graph...");
+
             // Remove loops containing memory from graph
             componentGraph.PreprocessGraph(invertMemory, retainParallel);
 
@@ -263,10 +265,10 @@ namespace Barotrauma_Circuit_Resolver.Util
             }
 
             // Apply sorted list of IDs to graph
-            foreach ((int id, int i) in componentGraph.Vertices
-                                                      .Select((v, i) => (v.Id, i))
-                                                      .OrderBy(t => t.Id))
-                sortedVertices[i].Id = id;
+            List<int> sortedIDs = componentGraph.Vertices.OrderBy(v => v.Id).Select(v => v.Id).ToList();
+            int i = 0;
+            foreach (int id in sortedIDs)
+                sortedVertices[i++].Id = id; // Note: Can't sortedIDs in the foreach directly as componentGraph.Vertices and sortedVertices are linked
 
             return componentGraph;
         }

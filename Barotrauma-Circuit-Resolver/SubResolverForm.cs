@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -80,11 +81,18 @@ namespace Barotrauma_Circuit_Resolver
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                 $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
+
+            string inputGraphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
+                                                $"{Path.GetFileNameWithoutExtension(inputFilepath)}_before.graphml");
+
             bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
             XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
 
-            (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) = 
-                GraphUtil.ResolveCircuit(FilepathTextBox.Text, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
+            GraphUtil.CreateComponentGraph(inputDocument).SaveGraphML(inputGraphFilepath);
+
+            (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
+                GraphUtil.ResolveCircuit(inputDocument, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
+
             if (ResolveBackgroundWorker.CancellationPending) { return; }
 
             // Update Submarine Name if a new file is made
@@ -93,7 +101,14 @@ namespace Barotrauma_Circuit_Resolver
                 resolvedSubmarine.Root.Attribute("name").Value = resolvedSubmarine.Root.Attribute("name").Value + " resolved";
             }
 
-            resolvedSubmarine.SaveSub(outputFilepath);
+            if (isSubFile)
+            {
+                resolvedSubmarine.SaveSub(outputFilepath);
+            }
+            else
+            {
+                File.WriteAllText(outputFilepath, resolvedSubmarine.ToString());
+            }
 
             if (SaveGraphCheckBox.Checked)
             {
