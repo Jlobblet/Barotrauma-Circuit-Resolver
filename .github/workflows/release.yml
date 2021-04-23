@@ -37,7 +37,6 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
-          body_path: /tmp/release-notes
       - name: Upload Binary
         uses: actions/upload-release-asset@v1
         env:
