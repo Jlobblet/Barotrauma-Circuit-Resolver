@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using BaroLib;
-using FSharpx.Collections.Experimental;
 using QuickGraph;
 
 namespace Barotrauma_Circuit_Resolver.Util
