@@ -13,8 +13,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Create release notes
-        run: git log --pretty=oneline --abbrev-commit --no-decorate --no-color "$(git describe --tags --abbrev=0)..HEAD" > /tmp/release-notes
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
