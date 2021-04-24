@@ -80,14 +80,8 @@ namespace Barotrauma_Circuit_Resolver
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                 $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
-
-            string inputGraphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
-                                                $"{Path.GetFileNameWithoutExtension(inputFilepath)}_before.graphml");
-
             bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
             XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
-
-            GraphUtil.CreateComponentGraph(inputDocument).SaveGraphML(inputGraphFilepath);
 
             (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
                 GraphUtil.ResolveCircuit(inputDocument, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
