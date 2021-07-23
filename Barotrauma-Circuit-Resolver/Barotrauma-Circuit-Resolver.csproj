@@ -6,6 +6,7 @@
     <RootNamespace>Barotrauma_Circuit_Resolver</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>circ_resolver_icon_pack.ico</ApplicationIcon>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
