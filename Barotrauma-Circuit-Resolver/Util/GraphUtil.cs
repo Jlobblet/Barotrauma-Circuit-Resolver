@@ -125,7 +125,7 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
 
         /// <summary>
-        /// Add connections between multiple connections after the same component to constrain the update-order sorting such
+        /// Add connections between the components after each component to constrain the update-order sorting such
         /// that the order between them remains the same after sorting. 
         /// </summary>
         /// <param name="graph"></param>
@@ -168,19 +168,17 @@ namespace Barotrauma_Circuit_Resolver.Util
 
             for (int i = 0; i < vertices.Count() - 1; i++)
             {
-                if (!unconnectedVertices.Contains(vertices[i])) continue;  // Vertex already determined interconnected
-
-                for (int j = 0; j < vertices.Count() - 1; j++) // j starts as i+1 as any previous nodes need not be reconsidered
+                for (int j = 0; j < vertices.Count() - 1; j++)
                 {
                     if (j == i) continue; 
 
-                    if (graph.ContainsEdge(vertices[i], vertices[j]) ||
+                    if (graph.ContainsEdge(vertices[i], vertices[j]) || 
                         graph.ContainsEdge(vertices[j], vertices[i]))
                     {
-                        unconnectedVertices.Remove(vertices[i]);
+                        if (unconnectedVertices.Contains(vertices[i]))
+                            unconnectedVertices.Remove(vertices[i]);
 
-                        if (unconnectedVertices.Contains(vertices[i])) 
-                            unconnectedVertices.Remove(vertices[i]); // Might have been removed previously
+                        break;
                     }
                 }
             }
