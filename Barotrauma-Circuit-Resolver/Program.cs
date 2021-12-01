@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Barotrauma_Circuit_Resolver.Util;
 using BaroLib;
-
 #endif
 
 
