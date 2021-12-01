@@ -43,7 +43,11 @@ namespace Barotrauma_Circuit_Resolver
             XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
 
             if (isSubFile)
-                pictureBox1.Image = FormUtil.GetImageFromString(inputDocument.Root?.Attribute("previewimage")?.Value);
+            {
+                string preview = inputDocument.Root?.Attribute("previewimage")?.Value;
+                if (!string.IsNullOrWhiteSpace(preview))
+                    pictureBox1.Image = FormUtil.GetImageFromString(inputDocument.Root?.Attribute("previewimage")?.Value);
+            }
             else
                 pictureBox1.Image = null; // Assemblies do not contain preview images
         }
