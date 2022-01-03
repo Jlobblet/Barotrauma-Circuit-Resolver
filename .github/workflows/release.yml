@@ -26,7 +26,7 @@ jobs:
         run: |
           cd ./build_output
           7z a "${PROJECT_NAME}.zip" "${PROJECT_NAME}"
-          echo "::set-output name=binary_path::$(readlink -f ${PROJECT_NAME}.zip)"
+          echo "::set-output name=binary_path::${PROJECT_NAME}.zip"
           echo "::set-output name=asset_name::${PROJECT_NAME}.zip"
           cd -
       - name: Create Release
