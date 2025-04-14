@@ -147,7 +147,11 @@ namespace Barotrauma_Circuit_Resolver.Util
                     sortedTargets = RemoveInterconnected(graph, sortedTargets);
 
                     // Create connections between the outgoing edges
-                    for(int i=0; i<sortedTargets.Count()-1; i++)
+
+                    // To-do: Pretty sure this can or will create arithmetic loops in some circuits... could use a disclaimer
+                    // but I'm about to implement the better picking-time based sort control and I'm not really seeing anyone else
+                    // caring either.
+                    for (int i=0; i<sortedTargets.Count()-1; i++)
                         constraints.Add(new Edge<Vertex>(sortedTargets[i], sortedTargets[i + 1]));
                 }
             }
