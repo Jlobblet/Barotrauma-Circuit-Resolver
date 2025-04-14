@@ -7,14 +7,15 @@ namespace Barotrauma_Circuit_Resolver.Util
 {
     public class Vertex
     {
-        public Vertex(int id) : this(id, id.ToString())
+        public Vertex(int id) : this(id, id.ToString(), 0.0f)
         {
         }
 
-        public Vertex(int id, string name)
+        public Vertex(int id, string name, float pickingTime)
         {
             Id = id;
             Name = name;
+            PickingTime = pickingTime;
             OutgoingEdges = new HashSet<Edge<Vertex>>();
             IncomingEdges = new HashSet<Edge<Vertex>>();
         }
@@ -22,6 +23,8 @@ namespace Barotrauma_Circuit_Resolver.Util
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public float PickingTime { get; set; }
 
         public int Order => Edges.Count();
         internal HashSet<Edge<Vertex>> OutgoingEdges { get; set; }

@@ -37,7 +37,10 @@ namespace Barotrauma_Circuit_Resolver.Util
                                          .Any())
                             .Select(e =>
                                         new Vertex(int.Parse(e.Attribute("ID")?.Value!),
-                                                   e.Attribute("identifier")?.Value));
+                                                   e.Attribute("identifier")?.Value,
+                                                   float.Parse(e.Descendants()
+                                                    .FirstOrDefault()
+                                                    .Attribute("pickingtime")?.Value))); // As far as I see all comps have their "Component" item first
         }
 
         public static IEnumerable<Edge<Vertex>> GetEdges(
