@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Xml.Linq;
 using BaroLib;
@@ -40,7 +41,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                                                    e.Attribute("identifier")?.Value,
                                                    float.Parse(e.Descendants()
                                                     .FirstOrDefault()
-                                                    .Attribute("pickingtime")?.Value ?? "0.0"))); // As far as I see all comps have their "Component" item first
+                                                    .Attribute("PickingTime")?.Value ?? "6.0"))); // As far as I see all comps have their "Component" item first
         }
 
         public static IEnumerable<Edge<Vertex>> GetEdges(
@@ -105,13 +106,16 @@ namespace Barotrauma_Circuit_Resolver.Util
         /// <param name="invertMemory"></param>
         /// <param name="retainParallel"></param>
         public static void PreprocessGraph(
-            this AdjacencyGraph<Vertex, Edge<Vertex>> graph, bool invertMemory, bool retainParallel)
+            this AdjacencyGraph<Vertex, Edge<Vertex>> graph, bool invertMemory, bool retainParallel, bool sortPickingTime)
         {
             if (invertMemory)
                 InvertMemory(graph);
 
             if (retainParallel)
                 ConstrainParallel(graph);
+
+            if (sortPickingTime)
+                ConstrainByPickingTime(graph);
         }
 
         /// <summary>
@@ -176,18 +180,25 @@ namespace Barotrauma_Circuit_Resolver.Util
             // Get all components with nonzero picking time, in ascending order
             List < Vertex > pickingTimeComps = graph.Vertices.Where(v => v.PickingTime > 0).OrderBy(v => v.PickingTime).ToList();
 
+
             // Add a helper vertex for each unique time
             List <float> UniquePickingTimes = pickingTimeComps.Select(v => v.PickingTime).Distinct().ToList();
+
+            if (UniquePickingTimes.Count <= 1) return; // We can not to sort less than 2
+
             int maxId = graph.Vertices.Select(v => v.Id).Max();
             List<int> helperIds = Enumerable.Range(maxId + 1, UniquePickingTimes.Count - 1).ToList();
             List<Vertex> helpervertices = helperIds.Select(i => new Vertex(i)).ToList();
 
             // Add connections between comps to order and helper vertices
-            for (int i=0; i < UniquePickingTimes.Count - 1; i++)
+            for (int i=0; i < UniquePickingTimes.Count; i++)
             {
                 foreach(Vertex v in pickingTimeComps.Where(v => v.PickingTime == UniquePickingTimes[i]))
                 {
-                    constraints.Add(new Edge<Vertex>(v, helpervertices[i]));
+                    if(i >= 1)
+                        constraints.Add(new Edge<Vertex>(helpervertices[i-1], v));
+                    if(i < UniquePickingTimes.Count - 1)
+                        constraints.Add(new Edge<Vertex>(v, helpervertices[i]));
                 }
             }
 
@@ -278,12 +289,12 @@ namespace Barotrauma_Circuit_Resolver.Util
 
         public static AdjacencyGraph<Vertex, Edge<Vertex>> SolveUpdateOrder(
             this AdjacencyGraph<Vertex, Edge<Vertex>> componentGraph,
-            out Vertex[] sortedVertices, bool invertMemory, bool retainParallel)
+            out Vertex[] sortedVertices, bool invertMemory, bool retainParallel, bool sortPickingTime)
         {
             OnProgressUpdate?.Invoke(0.4f, "Preprocessing graph...");
 
             // Remove loops containing memory from graph
-            componentGraph.PreprocessGraph(invertMemory, retainParallel);
+            componentGraph.PreprocessGraph(invertMemory, retainParallel, sortPickingTime);
 
             // Create Vertex list for sorted vertices
             sortedVertices = new Vertex[componentGraph.VertexCount];
@@ -311,20 +322,20 @@ namespace Barotrauma_Circuit_Resolver.Util
         }
 
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(
-            XDocument inputDoc, bool invertMemory, bool retainParallel)
+            XDocument inputDoc, bool invertMemory, bool retainParallel, bool sortPickingTime)
         {
             OnProgressUpdate?.Invoke(0, "Extracting Component Graph...");
             AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 inputDoc.CreateComponentGraph();
 
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel);
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel, sortPickingTime);
             inputDoc.UpdateSubmarineIDs(graph, sortedVertices);
 
             return (inputDoc, graph);
             
         }
         public static (XDocument, AdjacencyGraph<Vertex, Edge<Vertex>>) ResolveCircuit(
-            string inputSub, bool invertMemory, bool retainParallel)
+            string inputSub, bool invertMemory, bool retainParallel, bool sortPickingTime)
         {
             OnProgressUpdate?.Invoke(0, "Loading Submarine...");
             XDocument submarine = IoUtil.LoadSub(inputSub);
@@ -333,7 +344,7 @@ namespace Barotrauma_Circuit_Resolver.Util
             AdjacencyGraph<Vertex, Edge<Vertex>> graph =
                 submarine.CreateComponentGraph();
 
-            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel);
+            graph.SolveUpdateOrder(out Vertex[] sortedVertices, invertMemory, retainParallel, sortPickingTime);
             submarine.UpdateSubmarineIDs(graph, sortedVertices);
 
             return (submarine, graph);

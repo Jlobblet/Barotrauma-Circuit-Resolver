@@ -21,6 +21,7 @@ namespace Barotrauma_Circuit_Resolver
             SaveGraphCheckBox.Checked = Settings.Default.SaveGraph;
             InvertMemoryCheckBox.Checked = Settings.Default.InvertMemory;
             RetainParallelCheckBox.Checked = Settings.Default.RetainParallel;
+            PickingTimeSortBox.Checked = Settings.Default.PickingTimeSort;
 
             // Subscribe to GraphUtil progress event
             GraphUtil.OnProgressUpdate += OnResolveProgressUpdate;
@@ -36,7 +37,7 @@ namespace Barotrauma_Circuit_Resolver
         private void BrowseButton_Click(object sender, EventArgs e)
         {
             string inputFilepath = FormUtil.ShowFileBrowserDialog();
-            if(string.IsNullOrWhiteSpace(inputFilepath)) return;
+            if (string.IsNullOrWhiteSpace(inputFilepath)) return;
             FilepathTextBox.Text = inputFilepath;
 
             bool isSubFile = Path.GetExtension(inputFilepath)!.Equals(".sub", StringComparison.OrdinalIgnoreCase);
@@ -60,9 +61,9 @@ namespace Barotrauma_Circuit_Resolver
 
         private void OnResolveProgressUpdate(float value, string label)
         {
-            Invoke((Action) delegate
+            Invoke((Action)delegate
                             {
-                                progressBar1.Value = (int) Math.Clamp(value * 100, 0, 100);
+                                progressBar1.Value = (int)Math.Clamp(value * 100, 0, 100);
                                 label1.Text = label;
                             });
         }
@@ -75,12 +76,12 @@ namespace Barotrauma_Circuit_Resolver
                 ResolveBackgroundWorker.CancelAsync();
                 return;
             }
-            
+
             string outputFilepath = NewSubCheckBox.Checked
                                         ? Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                        $"{Path.GetFileNameWithoutExtension(inputFilepath)} resolved{Path.GetExtension(inputFilepath)}")
                                         : inputFilepath;
-            
+
             string graphFilepath = Path.Combine(Path.GetDirectoryName(inputFilepath)!,
                                                 $"{Path.GetFileNameWithoutExtension(inputFilepath)}.graphml");
 
@@ -88,7 +89,7 @@ namespace Barotrauma_Circuit_Resolver
             XDocument inputDocument = isSubFile ? IoUtil.LoadSub(inputFilepath) : XDocument.Load(inputFilepath);
 
             (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
-                GraphUtil.ResolveCircuit(inputDocument, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked);
+                GraphUtil.ResolveCircuit(inputDocument, InvertMemoryCheckBox.Checked, RetainParallelCheckBox.Checked, PickingTimeSortBox.Checked);
 
             if (ResolveBackgroundWorker.CancellationPending) { return; }
 
@@ -142,6 +143,11 @@ namespace Barotrauma_Circuit_Resolver
             Settings.Default.SaveGraph = RetainParallelCheckBox.Checked;
             Settings.Default.Save();
         }
+        private void PickingTimeSort_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.PickingTimeSort = PickingTimeSortBox.Checked;
+            Settings.Default.Save();
+        }
 
         private void SubResolverForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -166,5 +172,6 @@ namespace Barotrauma_Circuit_Resolver
         {
 
         }
+
     }
 }

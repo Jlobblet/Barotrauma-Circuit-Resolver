@@ -21,7 +21,7 @@ namespace Barotrauma_Circuit_Resolver
             if (args.Length > 1)
             {
                 (XDocument resolvedSubmarine, QuickGraph.AdjacencyGraph<Vertex, Edge<Vertex>> graph) =
-                    GraphUtil.ResolveCircuit(args[0], true, false);
+                    GraphUtil.ResolveCircuit(args[0], true, false, false);
                 resolvedSubmarine.SaveSub(args[1]);
                 if (args.Length > 2) graph.SaveGraphML(args[2]);
             }
