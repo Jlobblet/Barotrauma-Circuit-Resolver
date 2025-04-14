@@ -40,7 +40,7 @@ namespace Barotrauma_Circuit_Resolver.Util
                                                    e.Attribute("identifier")?.Value,
                                                    float.Parse(e.Descendants()
                                                     .FirstOrDefault()
-                                                    .Attribute("pickingtime")?.Value))); // As far as I see all comps have their "Component" item first
+                                                    .Attribute("pickingtime")?.Value ?? "0.0"))); // As far as I see all comps have their "Component" item first
         }
 
         public static IEnumerable<Edge<Vertex>> GetEdges(
@@ -158,6 +158,40 @@ namespace Barotrauma_Circuit_Resolver.Util
                         constraints.Add(new Edge<Vertex>(sortedTargets[i], sortedTargets[i + 1]));
                 }
             }
+
+            // Add the constraints to the graph
+            graph.AddEdgeRange(constraints);
+        }
+
+        /// <summary>
+        /// Add constraints to further sort components by the value of their "pickingtime" attribute, which can be set manually in-game
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static void ConstrainByPickingTime(
+            this AdjacencyGraph<Vertex, Edge<Vertex>> graph)
+        {
+            List<Edge<Vertex>> constraints = new List<Edge<Vertex>>();
+
+            // Get all components with nonzero picking time, in ascending order
+            List < Vertex > pickingTimeComps = graph.Vertices.Where(v => v.PickingTime > 0).OrderBy(v => v.PickingTime).ToList();
+
+            // Add a helper vertex for each unique time
+            List <float> UniquePickingTimes = pickingTimeComps.Select(v => v.PickingTime).Distinct().ToList();
+            int maxId = graph.Vertices.Select(v => v.Id).Max();
+            List<int> helperIds = Enumerable.Range(maxId + 1, UniquePickingTimes.Count - 1).ToList();
+            List<Vertex> helpervertices = helperIds.Select(i => new Vertex(i)).ToList();
+
+            // Add connections between comps to order and helper vertices
+            for (int i=0; i < UniquePickingTimes.Count - 1; i++)
+            {
+                foreach(Vertex v in pickingTimeComps.Where(v => v.PickingTime == UniquePickingTimes[i]))
+                {
+                    constraints.Add(new Edge<Vertex>(v, helpervertices[i]));
+                }
+            }
+
+            graph.AddVertexRange(helpervertices);
 
             // Add the constraints to the graph
             graph.AddEdgeRange(constraints);
