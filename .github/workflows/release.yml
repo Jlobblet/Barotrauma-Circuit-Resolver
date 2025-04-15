@@ -20,7 +20,7 @@ jobs:
       - name: Install depencencies
         run: dotnet restore
       - name: Build Windows
-        run: dotnet publish .\Barotrauma-Circuit-Resolver\Barotrauma-Circuit-Resolver.csproj --configuration Release --no-restore --no-self-contained --runtime win-x64 --output "./build_output/${PROJECT_NAME}"
+        run: dotnet publish .\Barotrauma-Circuit-Resolver\Barotrauma-Circuit-Resolver.csproj --configuration Release --no-restore --no-self-contained --runtime win-x64 --output "./build_output/$env:PROJECT_NAME"
       - name: Zip Binary
         id: zip_binary
         run: |
