@@ -26,8 +26,8 @@ jobs:
         run: |
           cd ./build_output
           7z a "$env:PROJECT_NAME.zip" "$env:PROJECT_NAME."
-          echo "::set-output name=binary_path::$env:PROJECT_NAME..zip"
-          echo "::set-output name=asset_name::$env:PROJECT_NAME..zip"
+          echo "::set-output name=binary_path::$env:PROJECT_NAME.zip"
+          echo "::set-output name=asset_name::$env:PROJECT_NAME.zip"
           cd -
       - name: Create Release
         id: create_release
